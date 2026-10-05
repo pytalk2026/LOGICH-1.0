@@ -1,0 +1,2227 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Logich — конструктор логических схем</title>
+<meta name="description" content="Logich — визуальный конструктор логических схем. Версия 1.0">
+<meta name="author" content="pytalk2026">
+<style>
+  * { box-sizing: border-box; user-select: none; }
+  html, body {
+    margin: 0; padding: 0;
+    width: 100%; height: 100%;
+    overflow: hidden;
+  }
+  body {
+    background: #1e1e2f;
+    font-family: 'Segoe UI', Roboto, sans-serif;
+    color: #e0e0ff;
+  }
+  :root {
+    --header-pad: 12px 24px;
+    --header-title: 1.6rem;
+    --toolbar-btn-pad: 8px 18px;
+    --toolbar-btn-fs: .95rem;
+    --palette-w: 200px;
+    --palette-pad: 16px 10px;
+    --palette-item-pad: 10px 8px;
+    --palette-item-fs: .85rem;
+    --palette-icon-fs: 1.25rem;
+    --palette-h3-fs: .85rem;
+    --status-pad: 8px 24px;
+    --status-fs: .85rem;
+    --modal-w: 560px;
+    --modal-header-pad: 18px 24px;
+    --modal-header-fs: 1.2rem;
+    --modal-body-pad: 20px 24px;
+    --modal-footer-pad: 16px 24px;
+    --modal-btn-pad: 10px 22px;
+    --modal-btn-fs: .95rem;
+    --field-input-pad: 12px 16px;
+    --field-input-fs: 1rem;
+    --field-label-fs: .85rem;
+    --info-modal-w: 480px;
+  }
+  body.size-very-small { --header-pad: 6px 14px; --header-title: 1.05rem; --toolbar-btn-pad: 5px 11px; --toolbar-btn-fs: .7rem; --palette-w: 140px; --palette-pad: 8px 5px; --palette-item-pad: 6px 4px; --palette-item-fs: .65rem; --palette-icon-fs: .9rem; --palette-h3-fs: .65rem; --status-pad: 5px 14px; --status-fs: .65rem; --modal-w: 400px; --modal-header-pad: 10px 14px; --modal-header-fs: .9rem; --modal-body-pad: 12px 14px; --modal-footer-pad: 10px 14px; --modal-btn-pad: 6px 14px; --modal-btn-fs: .75rem; --field-input-pad: 8px 10px; --field-input-fs: .8rem; --field-label-fs: .7rem; --info-modal-w: 340px; }
+  body.size-small { --header-pad: 9px 18px; --header-title: 1.3rem; --toolbar-btn-pad: 6px 14px; --toolbar-btn-fs: .82rem; --palette-w: 170px; --palette-pad: 12px 8px; --palette-item-pad: 8px 6px; --palette-item-fs: .75rem; --palette-icon-fs: 1.05rem; --palette-h3-fs: .75rem; --status-pad: 6px 18px; --status-fs: .75rem; --modal-w: 470px; --modal-header-pad: 14px 18px; --modal-header-fs: 1.05rem; --modal-body-pad: 16px 18px; --modal-footer-pad: 12px 18px; --modal-btn-pad: 8px 18px; --modal-btn-fs: .85rem; --field-input-pad: 10px 12px; --field-input-fs: .9rem; --field-label-fs: .78rem; --info-modal-w: 400px; }
+  body.size-large { --header-pad: 14px 28px; --header-title: 1.85rem; --toolbar-btn-pad: 10px 22px; --toolbar-btn-fs: 1.05rem; --palette-w: 230px; --palette-pad: 20px 12px; --palette-item-pad: 12px 10px; --palette-item-fs: .95rem; --palette-icon-fs: 1.4rem; --palette-h3-fs: .95rem; --status-pad: 10px 28px; --status-fs: .95rem; --modal-w: 620px; --modal-header-pad: 22px 28px; --modal-header-fs: 1.35rem; --modal-body-pad: 24px 28px; --modal-footer-pad: 20px 28px; --modal-btn-pad: 12px 26px; --modal-btn-fs: 1.05rem; --field-input-pad: 14px 18px; --field-input-fs: 1.1rem; --field-label-fs: .9rem; --info-modal-w: 540px; }
+  body.size-very-large { --header-pad: 16px 32px; --header-title: 2.1rem; --toolbar-btn-pad: 12px 26px; --toolbar-btn-fs: 1.15rem; --palette-w: 270px; --palette-pad: 24px 14px; --palette-item-pad: 14px 12px; --palette-item-fs: 1.05rem; --palette-icon-fs: 1.6rem; --palette-h3-fs: 1.05rem; --status-pad: 12px 32px; --status-fs: 1.05rem; --modal-w: 700px; --modal-header-pad: 26px 32px; --modal-header-fs: 1.5rem; --modal-body-pad: 28px 32px; --modal-footer-pad: 24px 32px; --modal-btn-pad: 14px 30px; --modal-btn-fs: 1.15rem; --field-input-pad: 16px 20px; --field-input-fs: 1.2rem; --field-label-fs: 1rem; --info-modal-w: 620px; }
+
+  .app { width: 100vw; height: 100vh; background: #2a2a3c; display: flex; flex-direction: column; overflow: hidden; position: relative; }
+  .header { background: #1f1f2b; padding: var(--header-pad); display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #3b3b55; flex-shrink: 0; gap: 12px; position: relative; z-index: 30; }
+  .header-left { display: flex; align-items: center; gap: 14px; flex-shrink: 0; }
+  .header h1 { margin: 0; font-size: var(--header-title); font-weight: 500; letter-spacing: 2px; background: linear-gradient(135deg, #b0b0ff, #8a8aff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; white-space: nowrap; }
+  .toolbar { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; align-items: center; }
+  .toolbar button { background: #34344a; border: 1px solid #4a4a66; color: #e0e0ff; padding: var(--toolbar-btn-pad); border-radius: 30px; cursor: pointer; font-size: var(--toolbar-btn-fs); font-weight: 500; transition: all .2s; font-family: inherit; white-space: nowrap; }
+  .toolbar button:hover:not(:disabled) { background: #4a4a6a; transform: translateY(-2px); }
+  .toolbar button:disabled { opacity: .4; cursor: not-allowed; }
+  .toolbar button.danger { background: #4a2a3a; border-color: #7a3a5a; }
+  .toolbar button.danger:hover:not(:disabled) { background: #6a3a4a; }
+  .toolbar button.examples-btn { background: linear-gradient(135deg, #6a4a8a, #8a5a9a); border-color: #aa7aba; color: #eeddff; }
+  .toolbar button.examples-btn:hover { background: linear-gradient(135deg, #7a5aaa, #9a6abb); }
+  .toolbar button.settings-btn { background: linear-gradient(135deg, #4a4a8a, #6a6aaa); border-color: #8a8acc; color: #e0e0ff; font-size: 1.15em; padding: var(--toolbar-btn-pad); min-width: 44px; }
+  .toolbar button.settings-btn:hover { background: linear-gradient(135deg, #5a5aaa, #7a7acc); }
+  .toolbar button.icon-btn { padding: var(--toolbar-btn-pad); width: auto; min-width: 40px; display: inline-flex; align-items: center; justify-content: center; font-size: 1.05em; }
+  .toolbar .divider { width: 1px; height: 24px; background: #3b3b55; margin: 0 2px; }
+
+  .workspace { display: flex; flex: 1; overflow: hidden; min-height: 0; position: relative; }
+
+  .palette { background: #222234; border-right: 1px solid #3b3b55; padding: var(--palette-pad); display: flex; flex-direction: column; gap: 8px; overflow-y: auto; flex-shrink: 0; position: relative; z-index: 10; }
+  .palette.column { width: var(--palette-w); position: relative; height: 100%; }
+  .palette.expanded { position: absolute; top: 0; left: 0; height: 100%; width: 50vw; max-width: 700px; min-width: 320px; box-shadow: 8px 0 40px rgba(0,0,0,.6); border-right: 1px solid #6a6a9a; background: #26263a; z-index: 25; }
+  .palette::-webkit-scrollbar { width: 8px; }
+  .palette::-webkit-scrollbar-track { background: transparent; }
+  .palette::-webkit-scrollbar-thumb { background: #4a4a66; border-radius: 4px; }
+  .palette h3 { color: #9a9ac0; font-weight: 400; font-size: var(--palette-h3-fs); letter-spacing: 1px; margin: 8px 0 2px 8px; text-transform: uppercase; }
+  .palette h3:first-child { margin-top: 0; }
+  .palette-items { display: flex; flex-direction: column; gap: 8px; }
+  .palette.expanded .palette-items { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
+  .palette-item { position: relative; background: #2f2f44; border: 1px solid #4a4a66; border-radius: 12px; padding: var(--palette-item-pad); text-align: center; cursor: grab; transition: all .15s; box-shadow: 0 5px 0 #15151e; display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: var(--palette-item-fs); font-weight: 500; }
+  .palette.expanded .palette-item { padding: 18px 12px; font-size: 1rem; }
+  .palette.expanded .palette-item .icon { font-size: 1.8rem; }
+  .palette-item:hover { background: #3e3e5a; border-color: #7a7aa0; }
+  .palette-item:active { cursor: grabbing; transform: scale(.97); }
+  .palette-item .icon { font-size: var(--palette-icon-fs); font-weight: 700; font-family: monospace; }
+  .palette-item[data-type="AND"] .icon { color: #8aff8a; }
+  .palette-item[data-type="OR"] .icon { color: #8ac6ff; }
+  .palette-item[data-type="NOT"] .icon { color: #ffb86b; }
+  .palette-item[data-type="XOR"] .icon { color: #ff8a8a; }
+  .palette-item[data-type="SPLIT"] .icon { color: #c0a0ff; }
+  .palette-item[data-type="TIMER"] .icon { color: #66ddff; }
+  .palette-item[data-type="SWITCH"] .icon { color: #ffdd55; }
+  .palette-item[data-type="BUTTON"] .icon { color: #ff88ff; }
+  .palette-item[data-type="LAMP"] .icon { color: #ffff77; }
+  .palette-item[data-type="SOUND"] .icon { color: #ff99cc; }
+  .palette-item[data-type="DFF"] .icon { color: #66ffaa; }
+  .palette-item[data-type="JKFF"] .icon { color: #66ffdd; }
+  .palette-item[data-type="TFF"] .icon { color: #aaffdd; }
+  .palette-item[data-type="MUX"] .icon { color: #ffaa66; }
+  .palette-item[data-type="DEMUX"] .icon { color: #ff8866; }
+
+  .info-btn { position: absolute; top: 4px; right: 4px; width: 18px; height: 18px; border-radius: 50%; background: #4a4a66; border: 1px solid #6a6a9a; color: #cfcfff; font-size: 11px; font-weight: 700; font-family: 'Times New Roman', serif; font-style: italic; line-height: 1; display: flex; align-items: center; justify-content: center; cursor: pointer; padding: 0; transition: all .15s; z-index: 2; }
+  .info-btn:hover { background: #6a6aff; border-color: #8a8aff; color: #fff; transform: scale(1.15); }
+
+  .canvas-container { flex: 1; position: relative; background: #1a1a28; overflow: hidden; min-width: 0; }
+  body.free-field .canvas-container { cursor: grab; }
+  body.free-field.panning .canvas-container { cursor: grabbing; }
+  canvas { display: block; width: 100%; height: 100%; }
+
+  .zoom-indicator { display: none; position: absolute; bottom: 16px; right: 16px; background: rgba(30, 40, 35, 0.92); color: #aaffbb; padding: 6px 14px; border-radius: 12px; font-weight: 600; font-size: .85rem; border: 1px solid #5aaa6a; z-index: 50; font-family: 'Consolas', monospace; box-shadow: 0 4px 16px rgba(0,0,0,.4); }
+  body.free-field .zoom-indicator { display: block; }
+
+  .status { background: #1f1f2b; padding: var(--status-pad); color: #9a9ac0; font-size: var(--status-fs); border-top: 1px solid #3b3b55; display: flex; justify-content: space-between; flex-shrink: 0; align-items: center; gap: 16px; }
+  .status .mode { color: #b0b0ff; font-weight: 500; }
+  body.free-field .status .mode { color: #aaffbb; }
+  .status .hint { color: #6a6a8a; font-size: .8em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  /* КОНТЕКСТНОЕ МЕНЮ (ПКМ) */
+  .context-menu { position: fixed; background: #2a2a3c; border: 1px solid #5a5a7a; border-radius: 12px; padding: 6px; min-width: 200px; box-shadow: 0 12px 40px rgba(0,0,0,.7); z-index: 500; display: none; animation: cmFadeIn .12s ease; font-family: inherit; }
+  .context-menu.active { display: block; }
+  @keyframes cmFadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+  .context-menu-item { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 8px; cursor: pointer; color: #e0e0ff; font-size: .92rem; font-weight: 500; transition: all .12s; border: none; background: transparent; width: 100%; text-align: left; font-family: inherit; white-space: nowrap; }
+  .context-menu-item:hover { background: #3a3a5a; color: #fff; }
+  .context-menu-item:active { background: #4a4a6a; }
+  .context-menu-item.danger { color: #ff9999; }
+  .context-menu-item.danger:hover { background: #5a2a3a; color: #ffbbbb; }
+  .context-menu-item.accent { color: #aaffbb; }
+  .context-menu-item.accent:hover { background: #2a4a3a; color: #ccffdd; }
+  .context-menu-item .cm-icon { font-size: 1.15rem; flex-shrink: 0; width: 22px; text-align: center; line-height: 1; }
+  .context-menu-item .cm-label { flex: 1; }
+  .context-menu-item .cm-hint { color: #7a7a9a; font-size: .75rem; font-family: 'Consolas', monospace; margin-left: 6px; }
+  .context-menu-item:hover .cm-hint { color: #a0a0c0; }
+  .context-menu-divider { height: 1px; background: #3b3b55; margin: 6px 4px; }
+  .context-menu-header { padding: 8px 14px 4px; color: #8a8aff; font-size: .7rem; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+  .context-menu-header .cm-header-icon { font-size: 1rem; }
+
+  .modal-overlay { position: fixed; inset: 0; background: rgba(10, 10, 20, .75); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; z-index: 100; animation: fadeIn .15s ease; }
+  .modal-overlay.active { display: flex; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+  .modal { width: var(--modal-w); max-width: 90vw; max-height: 85vh; background: #2a2a3c; border: 1px solid #4a4a66; border-radius: 20px; box-shadow: 0 30px 60px rgba(0,0,0,.7); display: flex; flex-direction: column; overflow: hidden; animation: slideUp .2s ease; }
+  @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+  .modal-header { padding: var(--modal-header-pad); background: #1f1f2b; border-bottom: 1px solid #3b3b55; display: flex; justify-content: space-between; align-items: center; }
+  .modal-header h2 { margin: 0; font-size: var(--modal-header-fs); font-weight: 500; color: #b0b0ff; display: flex; align-items: center; gap: 8px; }
+  .modal-close { background: transparent; border: none; color: #9a9ac0; font-size: 1.5rem; cursor: pointer; width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; transition: all .15s; }
+  .modal-close:hover { background: #3a3a52; color: #fff; }
+
+  .modal-body { padding: var(--modal-body-pad); flex: 1; overflow-y: auto; }
+  .modal-body::-webkit-scrollbar { width: 8px; }
+  .modal-body::-webkit-scrollbar-track { background: transparent; }
+  .modal-body::-webkit-scrollbar-thumb { background: #4a4a66; border-radius: 4px; }
+
+  .field { margin-bottom: 16px; }
+  .field label { display: block; margin-bottom: 6px; font-size: var(--field-label-fs); color: #9a9ac0; text-transform: uppercase; letter-spacing: 1px; }
+  .field input { width: 100%; background: #1a1a28; border: 1px solid #4a4a66; border-radius: 10px; padding: var(--field-input-pad); color: #e0e0ff; font-size: var(--field-input-fs); font-family: inherit; outline: none; transition: border-color .15s; }
+  .field input:focus { border-color: #8a8aff; box-shadow: 0 0 0 3px rgba(138,138,255,.15); }
+
+  .slider-row { display: flex; align-items: center; gap: 14px; }
+  .slider-row input[type="range"] { flex: 1; -webkit-appearance: none; appearance: none; height: 6px; background: #1a1a28; border-radius: 3px; outline: none; }
+  .slider-row input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 20px; height: 20px; background: linear-gradient(135deg, #6a6aff, #8a8aff); border-radius: 50%; cursor: pointer; box-shadow: 0 2px 8px rgba(138,138,255,.5); }
+  .slider-row input[type="range"]::-moz-range-thumb { width: 20px; height: 20px; background: linear-gradient(135deg, #6a6aff, #8a8aff); border-radius: 50%; cursor: pointer; border: none; }
+  .slider-value { min-width: 40px; text-align: center; color: #b0b0ff; font-weight: 600; font-size: 1.1rem; }
+
+  .duration-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .duration-row .field { margin-bottom: 0; }
+  .duration-row select, .duration-row input { width: 100%; background: #1a1a28; border: 1px solid #4a4a66; border-radius: 10px; padding: 10px 12px; color: #e0e0ff; font-size: .95rem; font-family: inherit; outline: none; transition: border-color .15s; cursor: pointer; }
+  .duration-row select:focus, .duration-row input:focus { border-color: #8a8aff; box-shadow: 0 0 0 3px rgba(138,138,255,.15); }
+  .duration-row select option { background: #1a1a28; }
+
+  .timer-preview { margin-top: 8px; padding: 12px 16px; background: #1a1a28; border: 1px solid #3a3a52; border-radius: 10px; color: #8ac6ff; font-family: 'Consolas', monospace; font-size: .9rem; text-align: center; }
+
+  .waveform-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 4px; }
+  .wave-btn { background: #2f2f44; border: 1px solid #4a4a66; color: #e0e0ff; padding: 12px 8px; border-radius: 10px; cursor: pointer; font-family: inherit; font-size: .9rem; transition: all .15s; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .wave-btn:hover { background: #3e3e5a; border-color: #7a7aa0; }
+  .wave-btn.active { background: linear-gradient(135deg, #6a3a6a, #8a4a8a); border-color: #ff99cc; color: #fff; box-shadow: 0 4px 12px rgba(255,153,204,.3); }
+  .wave-btn canvas { width: 50px; height: 24px; display: block; }
+
+  .saved-list-title { font-size: .85rem; color: #9a9ac0; text-transform: uppercase; letter-spacing: 1px; margin: 24px 0 10px; display: flex; justify-content: space-between; align-items: center; }
+  .saved-list-title .count { background: #3a3a52; color: #b0b0ff; padding: 2px 10px; border-radius: 10px; font-size: .75rem; letter-spacing: 0; }
+  .saved-list { display: flex; flex-direction: column; gap: 8px; max-height: 300px; overflow-y: auto; padding-right: 4px; }
+  .saved-list::-webkit-scrollbar { width: 6px; }
+  .saved-list::-webkit-scrollbar-track { background: transparent; }
+  .saved-list::-webkit-scrollbar-thumb { background: #4a4a66; border-radius: 3px; }
+  .saved-empty { text-align: center; padding: 30px 10px; color: #6a6a8a; font-style: italic; }
+  .saved-item { display: flex; justify-content: space-between; align-items: center; background: #2f2f44; border: 1px solid #4a4a66; border-radius: 12px; padding: 12px 16px; transition: all .15s; }
+  .saved-item:hover { background: #3a3a52; border-color: #6a6a9a; }
+  .saved-item .info { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
+  .saved-item .name { font-weight: 500; color: #e0e0ff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .saved-item .meta { font-size: .75rem; color: #7a7a9a; }
+  .saved-item .actions { display: flex; gap: 6px; flex-shrink: 0; }
+  .saved-item .actions button { background: #4a4a66; border: none; color: #e0e0ff; padding: 6px 12px; border-radius: 8px; font-size: .8rem; cursor: pointer; transition: all .15s; font-family: inherit; }
+  .saved-item .actions button:hover { background: #5a5a7a; }
+  .saved-item .actions button.del { background: #4a2a3a; color: #ffaaaa; }
+  .saved-item .actions button.del:hover { background: #6a3a4a; }
+
+  .modal-footer { padding: var(--modal-footer-pad); background: #1f1f2b; border-top: 1px solid #3b3b55; display: flex; gap: 10px; justify-content: flex-end; }
+  .modal-footer button { padding: var(--modal-btn-pad); border-radius: 30px; border: 1px solid #4a4a66; background: #34344a; color: #e0e0ff; font-size: var(--modal-btn-fs); font-weight: 500; cursor: pointer; transition: all .15s; font-family: inherit; }
+  .modal-footer button:hover { background: #4a4a6a; }
+  .modal-footer button.primary { background: linear-gradient(135deg, #6a6aff, #8a8aff); border-color: #8a8aff; color: #fff; box-shadow: 0 4px 12px rgba(138,138,255,.3); }
+  .modal-footer button.primary:hover { background: linear-gradient(135deg, #7a7aff, #9a9aff); transform: translateY(-1px); }
+
+  .info-modal { width: var(--info-modal-w); }
+  .info-content .info-section { margin-bottom: 18px; }
+  .info-content .info-section:last-child { margin-bottom: 0; }
+  .info-content h4 { margin: 0 0 8px; color: #8a8aff; font-size: .8rem; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 600; }
+  .info-content p { margin: 0; color: #c0c0e0; line-height: 1.55; font-size: .95rem; }
+  .info-content .formula { background: #1a1a28; border: 1px solid #3a3a52; border-radius: 10px; padding: 12px 16px; font-family: 'Consolas', 'Monaco', monospace; color: #b0b0ff; font-size: 1.05rem; text-align: center; letter-spacing: 1px; }
+  .info-content table { width: 100%; border-collapse: collapse; font-size: .9rem; font-family: 'Consolas', monospace; }
+  .info-content table th, .info-content table td { padding: 7px 10px; text-align: center; border-bottom: 1px solid #3a3a52; }
+  .info-content table th { background: #1f1f2b; color: #9a9ac0; font-weight: 500; font-size: .8rem; text-transform: uppercase; letter-spacing: .5px; }
+  .info-content table td { color: #e0e0ff; }
+  .info-content table tr:last-child td { border-bottom: none; }
+  .info-content table td.high { color: #8aff8a; font-weight: 600; }
+  .info-content table td.low { color: #6a6a8a; }
+
+  .settings-modal { width: 900px; max-width: 95vw; max-height: 90vh; height: 80vh; }
+  .settings-layout { display: flex; flex: 1; overflow: hidden; min-height: 0; }
+  .settings-sidebar { width: 220px; background: #222234; border-right: 1px solid #3b3b55; padding: 16px 10px; display: flex; flex-direction: column; gap: 6px; overflow-y: auto; flex-shrink: 0; }
+  .settings-sidebar::-webkit-scrollbar { width: 6px; }
+  .settings-sidebar::-webkit-scrollbar-thumb { background: #4a4a66; border-radius: 3px; }
+  .settings-nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; cursor: pointer; transition: all .15s; background: transparent; border: 1px solid transparent; color: #c0c0e0; font-family: inherit; font-size: .95rem; font-weight: 500; text-align: left; width: 100%; }
+  .settings-nav-item:hover { background: #2f2f44; border-color: #4a4a66; color: #e0e0ff; }
+  .settings-nav-item.active { background: linear-gradient(135deg, #3a3a6a, #4a4a8a); border-color: #8a8aff; color: #fff; box-shadow: 0 4px 12px rgba(138,138,255,.25); }
+  .settings-nav-icon { font-size: 1.3rem; line-height: 1; flex-shrink: 0; }
+  .settings-content { flex: 1; padding: 24px 28px; overflow-y: auto; min-width: 0; }
+  .settings-content::-webkit-scrollbar { width: 8px; }
+  .settings-content::-webkit-scrollbar-thumb { background: #4a4a66; border-radius: 4px; }
+  .settings-panel { display: none; }
+  .settings-panel.active { display: block; animation: fadeIn .15s ease; }
+  .settings-panel-title { margin: 0 0 6px; font-size: 1.3rem; font-weight: 600; color: #b0b0ff; letter-spacing: .5px; }
+  .settings-panel-desc { margin: 0 0 22px; color: #8a8aaa; font-size: .9rem; line-height: 1.5; }
+  .settings-section { background: #2f2f44; border: 1px solid #4a4a66; border-radius: 14px; padding: 18px 20px; margin-bottom: 14px; }
+  .settings-section-title { color: #8a8aff; font-size: .78rem; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 600; margin: 0 0 12px; display: flex; align-items: center; gap: 8px; }
+  .settings-toggle-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 4px; cursor: pointer; border-radius: 10px; transition: background .15s; }
+  .settings-toggle-row:hover { background: #3a3a52; }
+  .settings-toggle-row .toggle-info { flex: 1; min-width: 0; }
+  .settings-toggle-row .toggle-title { color: #e0e0ff; font-weight: 600; font-size: 1rem; margin-bottom: 4px; }
+  .settings-toggle-row .toggle-desc { color: #8a8aaa; font-size: .85rem; line-height: 1.4; }
+  .switch { position: relative; width: 56px; height: 30px; background: #1a1a28; border: 1px solid #4a4a66; border-radius: 15px; flex-shrink: 0; transition: all .2s; }
+  .switch::after { content: ''; position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; background: #6a6a9a; border-radius: 50%; transition: all .2s; box-shadow: 0 2px 6px rgba(0,0,0,.4); }
+  .switch.on { background: linear-gradient(135deg, #3a7a4a, #4a9a5a); border-color: #5aaa6a; }
+  .switch.on::after { left: calc(100% - 25px); background: #aaffbb; box-shadow: 0 0 12px rgba(170,255,187,.8); }
+
+  .settings-size-options { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+  @media (max-width: 700px) { .settings-size-options { grid-template-columns: repeat(2, 1fr); } }
+  .settings-size-option { background: #2f2f44; border: 2px solid #4a4a66; border-radius: 12px; padding: 16px 8px; cursor: pointer; transition: all .15s; display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; }
+  .settings-size-option:hover { background: #3a3a52; border-color: #7a7aa0; transform: translateY(-2px); }
+  .settings-size-option.active { background: linear-gradient(135deg, #3a3a6a, #4a4a8a); border-color: #8a8aff; box-shadow: 0 4px 16px rgba(138,138,255,.3); }
+  .settings-size-preview { display: flex; align-items: center; justify-content: center; width: 64px; height: 44px; background: #1a1a28; border-radius: 8px; flex-shrink: 0; }
+  .settings-size-preview .mini-window { background: #4a4a66; border-radius: 3px; border: 1px solid #6a6a9a; }
+  .settings-size-option[data-size="very-small"] .mini-window { width: 20px; height: 14px; }
+  .settings-size-option[data-size="small"] .mini-window { width: 28px; height: 18px; }
+  .settings-size-option[data-size="medium"] .mini-window { width: 36px; height: 22px; }
+  .settings-size-option[data-size="large"] .mini-window { width: 44px; height: 26px; }
+  .settings-size-option[data-size="very-large"] .mini-window { width: 52px; height: 30px; }
+  .settings-size-name { font-weight: 600; color: #e0e0ff; font-size: .82rem; line-height: 1.2; }
+  .settings-size-option.active .settings-size-name { color: #fff; }
+
+  .help-section { margin-bottom: 24px; }
+  .help-section:last-child { margin-bottom: 0; }
+  .help-section-title { color: #8a8aff; font-size: .8rem; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 600; margin: 0 0 12px; display: flex; align-items: center; gap: 8px; }
+  .help-card { background: #2f2f44; border: 1px solid #4a4a66; border-radius: 12px; padding: 14px 18px; margin-bottom: 8px; display: flex; gap: 14px; align-items: flex-start; }
+  .help-card:last-child { margin-bottom: 0; }
+  .help-card-icon { font-size: 1.5rem; flex-shrink: 0; line-height: 1; margin-top: 2px; }
+  .help-card-body { flex: 1; min-width: 0; }
+  .help-card-title { color: #e0e0ff; font-weight: 600; font-size: .95rem; margin-bottom: 4px; }
+  .help-card-desc { color: #a0a0c0; font-size: .85rem; line-height: 1.5; }
+  .help-card-desc kbd { background: #1a1a28; border: 1px solid #4a4a66; border-radius: 4px; padding: 1px 7px; font-family: 'Consolas', monospace; font-size: .8em; color: #b0b0ff; box-shadow: 0 2px 0 #15151e; margin: 0 2px; }
+  .help-tip { background: linear-gradient(135deg, #2a3a5a, #3a4a6a); border: 1px solid #5a7aaa; border-radius: 12px; padding: 14px 18px; color: #cce0ff; font-size: .88rem; line-height: 1.55; display: flex; gap: 12px; }
+  .help-tip.free-field-tip { background: linear-gradient(135deg, #2a4a3a, #3a5a4a); border-color: #5aaa6a; color: #ccffdd; }
+  .help-tip .tip-icon { font-size: 1.3rem; flex-shrink: 0; }
+
+  /* About app info */
+  .about-app {
+    background: linear-gradient(135deg, #2f2f4a, #3a3a5a);
+    border: 1px solid #5a5aaa;
+    border-radius: 14px;
+    padding: 22px 24px;
+    text-align: center;
+  }
+  .about-app-logo {
+    font-size: 2.6rem;
+    margin-bottom: 8px;
+    background: linear-gradient(135deg, #b0b0ff, #8a8aff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 700;
+    letter-spacing: 3px;
+  }
+  .about-app-version {
+    display: inline-block;
+    background: linear-gradient(135deg, #6a6aff, #8a8aff);
+    color: #fff;
+    padding: 4px 14px;
+    border-radius: 20px;
+    font-size: .8rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+    box-shadow: 0 4px 12px rgba(138,138,255,.4);
+  }
+  .about-app-desc {
+    color: #c0c0e0;
+    font-size: .9rem;
+    line-height: 1.55;
+    margin-bottom: 18px;
+  }
+  .about-app-credits {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    text-align: left;
+  }
+  .about-credit-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(0,0,0,.2);
+    border-radius: 10px;
+    padding: 10px 14px;
+  }
+  .about-credit-icon {
+    font-size: 1.3rem;
+    flex-shrink: 0;
+    width: 28px;
+    text-align: center;
+  }
+  .about-credit-info { flex: 1; min-width: 0; }
+  .about-credit-label {
+    color: #8a8aaa;
+    font-size: .72rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 2px;
+  }
+  .about-credit-value {
+    color: #e0e0ff;
+    font-weight: 600;
+    font-size: .95rem;
+  }
+  .about-credit-value a {
+    color: #8a8aff;
+    text-decoration: none;
+  }
+  .about-credit-value a:hover { text-decoration: underline; }
+
+  .examples-modal { width: 780px; max-width: 92vw; }
+  .examples-filter { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+  .filter-btn { background: #2f2f44; border: 1px solid #4a4a66; color: #c0c0e0; padding: 8px 16px; border-radius: 20px; cursor: pointer; font-family: inherit; font-size: .85rem; transition: all .15s; font-weight: 500; }
+  .filter-btn:hover { background: #3e3e5a; border-color: #7a7aa0; }
+  .filter-btn.active { background: linear-gradient(135deg, #5a5aee, #7a7aff); border-color: #8a8aff; color: #fff; box-shadow: 0 4px 12px rgba(138,138,255,.3); }
+  .filter-btn .count { background: rgba(0,0,0,.3); padding: 1px 8px; border-radius: 10px; font-size: .75rem; margin-left: 4px; }
+  .examples-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
+  .example-card { background: #2f2f44; border: 1px solid #4a4a66; border-radius: 14px; padding: 16px; cursor: pointer; transition: all .2s; display: flex; flex-direction: column; gap: 10px; }
+  .example-card:hover { background: #3a3a52; border-color: #8a8aff; transform: translateY(-3px); box-shadow: 0 10px 24px rgba(0,0,0,.4); }
+  .example-card-header { display: flex; align-items: center; gap: 10px; }
+  .example-card-icon { font-size: 2rem; line-height: 1; flex-shrink: 0; }
+  .example-card-title { flex: 1; min-width: 0; }
+  .example-card-name { font-weight: 600; color: #e0e0ff; font-size: .95rem; margin-bottom: 2px; }
+  .example-card-desc { font-size: .78rem; color: #8a8aaa; line-height: 1.4; }
+  .example-card-footer { display: flex; justify-content: space-between; align-items: center; margin-top: auto; padding-top: 10px; border-top: 1px solid #3a3a52; }
+  .complexity-badge { font-size: .72rem; padding: 3px 10px; border-radius: 10px; font-weight: 600; }
+  .complexity-badge.easy { background: #2a4a2a; color: #8aff8a; }
+  .complexity-badge.medium { background: #4a4a2a; color: #ffdd77; }
+  .complexity-badge.hard { background: #4a2a2a; color: #ff8a8a; }
+  .complexity-badge.veryhard { background: #3a1a4a; color: #d888ff; }
+  .example-card-stats { font-size: .72rem; color: #6a6a8a; }
+
+  .always-row { display: flex; align-items: center; gap: 10px; margin-top: 10px; padding: 10px 14px; background: #1a1a28; border: 1px solid #3a3a52; border-radius: 10px; cursor: pointer; transition: all .15s; }
+  .always-row:hover { border-color: #8a8aff; }
+  .always-row input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; accent-color: #8a8aff; }
+  .always-row label { cursor: pointer; color: #c0c0e0; font-size: .9rem; margin: 0; }
+
+  .settings-action-btn { background: linear-gradient(135deg, #5a4a3a, #6a5a4a); border: 1px solid #8a7a5a; color: #ffddaa; padding: 10px 20px; border-radius: 20px; cursor: pointer; font-family: inherit; font-size: .9rem; font-weight: 500; transition: all .15s; display: inline-flex; align-items: center; gap: 8px; }
+  .settings-action-btn:hover { background: linear-gradient(135deg, #6a5a4a, #7a6a5a); transform: translateY(-1px); }
+  .settings-action-btn:disabled { opacity: .4; cursor: not-allowed; transform: none; }
+
+  .toast { position: fixed; bottom: 70px; left: 50%; transform: translateX(-50%) translateY(20px); background: linear-gradient(135deg, #4a4a6a, #5a5a8a); color: #fff; padding: 12px 24px; border-radius: 30px; box-shadow: 0 8px 24px rgba(0,0,0,.5); font-size: .9rem; font-weight: 500; opacity: 0; pointer-events: none; transition: all .3s; z-index: 600; border: 1px solid #7a7aa0; }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .toast.free-field-toast { background: linear-gradient(135deg, #3a6a4a, #4a8a5a); border-color: #6aba7a; color: #ddffee; }
+</style>
+</head>
+<body class="size-small">
+<div class="app">
+  <div class="header">
+    <div class="header-left"><h1>⚡ LOGICH</h1></div>
+    <div class="toolbar">
+      <button id="panelToggleBtn" class="icon-btn" title="Развернуть панель на пол-экрана">☰</button>
+      <div class="divider"></div>
+      <button id="undoBtn" class="icon-btn" title="Отменить (Ctrl+Z)" disabled>↶</button>
+      <button id="redoBtn" class="icon-btn" title="Вернуть (Ctrl+Y)" disabled>↷</button>
+      <div class="divider"></div>
+      <button id="examplesBtn" class="examples-btn">📚 Примеры</button>
+      <button id="saveBtn">💾 Сохранить</button>
+      <button id="loadBtn">📂 Загрузить</button>
+      <button id="clearBtn" class="danger">🗑 Очистить</button>
+      <div class="divider"></div>
+      <button id="settingsBtn" class="settings-btn" title="Настройки">⚙️</button>
+    </div>
+  </div>
+  <div class="workspace" id="workspace">
+    <div class="palette column" id="palette">
+      <h3>Логика</h3>
+      <div class="palette-items">
+        <div class="palette-item" draggable="true" data-type="AND"><button class="info-btn" data-info="AND">i</button><span class="icon">AND</span><span>И</span></div>
+        <div class="palette-item" draggable="true" data-type="OR"><button class="info-btn" data-info="OR">i</button><span class="icon">OR</span><span>ИЛИ</span></div>
+        <div class="palette-item" draggable="true" data-type="NOT"><button class="info-btn" data-info="NOT">i</button><span class="icon">NOT</span><span>НЕ</span></div>
+        <div class="palette-item" draggable="true" data-type="XOR"><button class="info-btn" data-info="XOR">i</button><span class="icon">XOR</span><span>КСОР</span></div>
+        <div class="palette-item" draggable="true" data-type="SPLIT"><button class="info-btn" data-info="SPLIT">i</button><span class="icon">Y</span><span>Разветвитель</span></div>
+        <div class="palette-item" draggable="true" data-type="TIMER"><button class="info-btn" data-info="TIMER">i</button><span class="icon">⏱</span><span>Таймер</span></div>
+      </div>
+      <h3>Триггеры</h3>
+      <div class="palette-items">
+        <div class="palette-item" draggable="true" data-type="DFF"><button class="info-btn" data-info="DFF">i</button><span class="icon">D</span><span>D-триггер</span></div>
+        <div class="palette-item" draggable="true" data-type="JKFF"><button class="info-btn" data-info="JKFF">i</button><span class="icon">JK</span><span>JK-триггер</span></div>
+        <div class="palette-item" draggable="true" data-type="TFF"><button class="info-btn" data-info="TFF">i</button><span class="icon">T</span><span>T-триггер</span></div>
+      </div>
+      <h3>Коммутация</h3>
+      <div class="palette-items">
+        <div class="palette-item" draggable="true" data-type="MUX"><button class="info-btn" data-info="MUX">i</button><span class="icon">MUX</span><span>Мультиплексор</span></div>
+        <div class="palette-item" draggable="true" data-type="DEMUX"><button class="info-btn" data-info="DEMUX">i</button><span class="icon">DMX</span><span>Демультиплексор</span></div>
+      </div>
+      <h3>Ввод</h3>
+      <div class="palette-items">
+        <div class="palette-item" draggable="true" data-type="SWITCH"><button class="info-btn" data-info="SWITCH">i</button><span class="icon">⌷</span><span>Рычаг</span></div>
+        <div class="palette-item" draggable="true" data-type="BUTTON"><button class="info-btn" data-info="BUTTON">i</button><span class="icon">⏺</span><span>Кнопка</span></div>
+      </div>
+      <h3>Результат</h3>
+      <div class="palette-items">
+        <div class="palette-item" draggable="true" data-type="LAMP"><button class="info-btn" data-info="LAMP">i</button><span class="icon">💡</span><span>Лампочка</span></div>
+        <div class="palette-item" draggable="true" data-type="SOUND"><button class="info-btn" data-info="SOUND">i</button><span class="icon">🔊</span><span>Звук</span></div>
+      </div>
+    </div>
+    <div class="canvas-container" id="canvasContainer">
+      <canvas id="canvas"></canvas>
+      <div class="zoom-indicator" id="zoomIndicator">100% · x=0 y=0</div>
+    </div>
+  </div>
+  <div class="status">
+    <span>Режим: <span class="mode" id="modeDisplay">Выбор</span></span>
+    <span class="hint" id="statusHint">ЛКМ — выбрать · ПКМ — контекстное меню · Ctrl+C/V · Ctrl+Z/Y · Del</span>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- КОНТЕКСТНОЕ МЕНЮ (ПКМ по элементу) -->
+<div class="context-menu" id="elementContextMenu">
+  <div class="context-menu-header" id="elementMenuHeader">
+    <span class="cm-header-icon">🔷</span>
+    <span id="elementMenuType">Элемент</span>
+  </div>
+  <button class="context-menu-item" data-action="help"><span class="cm-icon">❓</span><span class="cm-label">Помощь по элементу</span></button>
+  <button class="context-menu-item" data-action="copy"><span class="cm-icon">📋</span><span class="cm-label">Копировать</span><span class="cm-hint">Ctrl+C</span></button>
+  <button class="context-menu-item accent" data-action="activate" id="elementMenuActivate"><span class="cm-icon">⚡</span><span class="cm-label">Активировать</span></button>
+  <div class="context-menu-divider"></div>
+  <button class="context-menu-item danger" data-action="delete"><span class="cm-icon">🗑</span><span class="cm-label">Удалить</span><span class="cm-hint">Del</span></button>
+</div>
+
+<!-- КОНТЕКСТНОЕ МЕНЮ (ПКМ по полю) -->
+<div class="context-menu" id="fieldContextMenu">
+  <div class="context-menu-header"><span class="cm-header-icon">🌐</span><span>Поле</span></div>
+  <button class="context-menu-item" data-action="paste" id="fieldMenuPaste"><span class="cm-icon">📥</span><span class="cm-label">Вставить</span><span class="cm-hint">Ctrl+V</span></button>
+  <button class="context-menu-item danger" data-action="clearAll"><span class="cm-icon">🗑</span><span class="cm-label">Удалить все элементы</span></button>
+  <div class="context-menu-divider"></div>
+  <button class="context-menu-item accent" data-action="toggleZoom" id="fieldMenuZoom"><span class="cm-icon">🗺</span><span class="cm-label">Включить масштабирование</span></button>
+</div>
+
+<!-- Модалка сохранения -->
+<div class="modal-overlay" id="saveModal">
+  <div class="modal">
+    <div class="modal-header"><h2>💾 Сохранение схемы</h2><button class="modal-close" id="modalCloseBtn">×</button></div>
+    <div class="modal-body">
+      <div class="field"><label>Название схемы</label><input type="text" id="schemeName" placeholder="Например: Полусумматор" maxlength="60" autocomplete="off"></div>
+      <div class="saved-list-title"><span>Сохранённые схемы</span><span class="count" id="savedCount">0</span></div>
+      <div class="saved-list" id="savedList"><div class="saved-empty">Пока ничего не сохранено</div></div>
+    </div>
+    <div class="modal-footer"><button id="modalCancelBtn">Отмена</button><button id="modalSaveBtn" class="primary">Сохранить</button></div>
+  </div>
+</div>
+
+<!-- Info modal -->
+<div class="modal-overlay" id="infoModal">
+  <div class="modal info-modal">
+    <div class="modal-header"><h2 id="infoTitle">Информация</h2><button class="modal-close" id="infoCloseBtn">×</button></div>
+    <div class="modal-body"><div class="info-content" id="infoContent"></div></div>
+    <div class="modal-footer"><button id="infoOkBtn" class="primary">Понятно</button></div>
+  </div>
+</div>
+
+<!-- Examples modal -->
+<div class="modal-overlay" id="examplesModal">
+  <div class="modal examples-modal">
+    <div class="modal-header"><h2>📚 Примеры схем</h2><button class="modal-close" id="examplesCloseBtn">×</button></div>
+    <div class="modal-body">
+      <div class="examples-filter" id="examplesFilter">
+        <button class="filter-btn active" data-filter="all">Все <span class="count" id="cntAll">0</span></button>
+        <button class="filter-btn" data-filter="easy">🟢 Лёгкие <span class="count" id="cntEasy">0</span></button>
+        <button class="filter-btn" data-filter="medium">🟡 Средние <span class="count" id="cntMedium">0</span></button>
+        <button class="filter-btn" data-filter="hard">🔴 Сложные <span class="count" id="cntHard">0</span></button>
+        <button class="filter-btn" data-filter="veryhard">🟣 Очень сложные <span class="count" id="cntVeryHard">0</span></button>
+      </div>
+      <div class="examples-grid" id="examplesGrid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Settings modal -->
+<div class="modal-overlay" id="settingsModal">
+  <div class="modal settings-modal">
+    <div class="modal-header"><h2>⚙️ Настройки</h2><button class="modal-close" id="settingsCloseBtn">×</button></div>
+    <div class="settings-layout">
+      <div class="settings-sidebar" id="settingsSidebar">
+        <button class="settings-nav-item active" data-panel="help"><span class="settings-nav-icon">❓</span><span>Помощь</span></button>
+        <button class="settings-nav-item" data-panel="zoom"><span class="settings-nav-icon">🗺</span><span>Масштабирование</span></button>
+        <button class="settings-nav-item" data-panel="interface"><span class="settings-nav-icon">🎨</span><span>Интерфейс</span></button>
+      </div>
+      <div class="settings-content">
+        <!-- HELP PANEL -->
+        <div class="settings-panel active" data-panel="help">
+          <h3 class="settings-panel-title">❓ Помощь</h3>
+          <p class="settings-panel-desc">Как работать в Logich</p>
+
+          <div class="help-section">
+            <div class="help-section-title">🖱 Основные действия</div>
+            <div class="help-card"><div class="help-card-icon">➕</div><div class="help-card-body"><div class="help-card-title">Добавить элемент</div><div class="help-card-desc">Перетащите элемент из <b>боковой панели</b>. Кнопка <b>☰</b> расширяет панель.</div></div></div>
+            <div class="help-card"><div class="help-card-icon">✋</div><div class="help-card-body"><div class="help-card-title">Переместить элемент</div><div class="help-card-desc">Зажмите ЛКМ на элементе и перетащите. Можно двигать <b>группу</b>.</div></div></div>
+            <div class="help-card"><div class="help-card-icon">🔗</div><div class="help-card-body"><div class="help-card-title">Соединить проводом</div><div class="help-card-desc">Зажмите на <b>выходе</b> и тяните к <b>входу</b>.</div></div></div>
+            <div class="help-card"><div class="help-card-icon">🖱</div><div class="help-card-body"><div class="help-card-title">Контекстное меню</div><div class="help-card-desc"><b>ПКМ по элементу</b> — помощь, копирование, активация, удаление. <b>ПКМ по полю</b> — вставить, удалить всё, вкл/выкл масштабирование.</div></div></div>
+          </div>
+
+          <div class="help-section">
+            <div class="help-section-title">📋 Копирование</div>
+            <div class="help-card"><div class="help-card-icon">📄</div><div class="help-card-body"><div class="help-card-title">Ctrl+C / Ctrl+V</div><div class="help-card-desc"><kbd>Ctrl</kbd>+<kbd>C</kbd> — копировать. <kbd>Ctrl</kbd>+<kbd>V</kbd> — вставить. Или через контекстное меню ПКМ.</div></div></div>
+          </div>
+
+          <div class="help-section">
+            <div class="help-section-title">↶ Отмена</div>
+            <div class="help-card"><div class="help-card-icon">↶</div><div class="help-card-body"><div class="help-card-title">Отменить / Вернуть</div><div class="help-card-desc"><kbd>Ctrl</kbd>+<kbd>Z</kbd> — отменить, <kbd>Ctrl</kbd>+<kbd>Y</kbd> — вернуть. До 100 действий.</div></div></div>
+          </div>
+
+          <!-- О ПРОГРАММЕ -->
+          <div class="help-section">
+            <div class="help-section-title">ℹ️ О программе</div>
+            <div class="about-app">
+              <div class="about-app-logo">⚡ LOGICH</div>
+              <div class="about-app-version">Версия 1.0 stable</div>
+              <div class="about-app-desc">
+                Визуальный конструктор логических схем — от простых вентилей до триггеров,
+                мультиплексоров и счётчиков. Собирайте схемы мышью, сохраняйте
+                и делитесь ими.
+              </div>
+              <div class="about-app-credits">
+                <div class="about-credit-row">
+                  <div class="about-credit-icon">👤</div>
+                  <div class="about-credit-info">
+                    <div class="about-credit-label">Создатель</div>
+                    <div class="about-credit-value">pytalk2026</div>
+                  </div>
+                </div>
+                <div class="about-credit-row">
+                  <div class="about-credit-icon">🤖</div>
+                  <div class="about-credit-info">
+                    <div class="about-credit-label">Разработано с помощью ИИ</div>
+                    <div class="about-credit-value">DeepSeek</div>
+                  </div>
+                </div>
+                <div class="about-credit-row">
+                  <div class="about-credit-icon">📅</div>
+                  <div class="about-credit-info">
+                    <div class="about-credit-label">Год выпуска</div>
+                    <div class="about-credit-value">2026</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ZOOM PANEL -->
+        <div class="settings-panel" data-panel="zoom">
+          <h3 class="settings-panel-title">🗺 Масштабирование</h3>
+          <p class="settings-panel-desc">Свободное поле: зум и панорамирование</p>
+          <div class="settings-section">
+            <div class="settings-section-title">🗺 Свободное поле</div>
+            <div class="settings-toggle-row" id="freeFieldToggleRow">
+              <div class="toggle-info">
+                <div class="toggle-title">Режим свободного поля</div>
+                <div class="toggle-desc">Зум колёсиком (10% – 500%), панорамирование ПКМ. Позиция сохраняется.</div>
+              </div>
+              <div class="switch" id="freeFieldSwitch"></div>
+            </div>
+          </div>
+          <div class="settings-section">
+            <div class="settings-section-title">🎯 Позиция вида</div>
+            <div class="toggle-info" style="padding: 4px 4px 14px;">
+              <div class="toggle-desc" id="viewInfoText">Текущий масштаб: <b>100%</b> · Позиция: x=0, y=0</div>
+            </div>
+            <button class="settings-action-btn" id="resetViewBtn">⊙ Сбросить вид</button>
+          </div>
+        </div>
+
+        <!-- INTERFACE PANEL -->
+        <div class="settings-panel" data-panel="interface">
+          <h3 class="settings-panel-title">🎨 Интерфейс</h3>
+          <p class="settings-panel-desc">Размер программы</p>
+          <div class="settings-section">
+            <div class="settings-section-title">🔍 Размер программы</div>
+            <div class="settings-size-options" id="settingsSizeOptions">
+              <div class="settings-size-option" data-size="very-small"><div class="settings-size-preview"><div class="mini-window"></div></div><div class="settings-size-name">Очень<br>маленький</div></div>
+              <div class="settings-size-option active" data-size="small"><div class="settings-size-preview"><div class="mini-window"></div></div><div class="settings-size-name">Маленький</div></div>
+              <div class="settings-size-option" data-size="medium"><div class="settings-size-preview"><div class="mini-window"></div></div><div class="settings-size-name">Средний</div></div>
+              <div class="settings-size-option" data-size="large"><div class="settings-size-preview"><div class="mini-window"></div></div><div class="settings-size-name">Большой</div></div>
+              <div class="settings-size-option" data-size="very-large"><div class="settings-size-preview"><div class="mini-window"></div></div><div class="settings-size-name">Очень<br>большой</div></div>
+            </div>
+            <div class="toggle-desc" style="margin-top: 14px; font-size: .85rem;">Изменяет размеры элементов и интерфейса.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer"><button id="settingsOkBtn" class="primary">Готово</button></div>
+  </div>
+</div>
+
+<!-- Timer modal -->
+<div class="modal-overlay" id="timerModal">
+  <div class="modal">
+    <div class="modal-header"><h2>⏱ Настройка таймера</h2><button class="modal-close" id="timerCloseBtn">×</button></div>
+    <div class="modal-body">
+      <div class="field"><label>Количество выходов</label><div class="slider-row"><input type="range" id="timerOutCount" min="1" max="4" step="1" value="1"><span class="slider-value" id="timerOutCountVal">1</span></div></div>
+      <div class="field"><label>Задержка сигнала</label><div class="duration-row"><input type="number" id="timerDelayValue" min="1" value="1" step="1"><select id="timerDelayUnit"><option value="ms">Миллисекунды</option><option value="s" selected>Секунды</option><option value="m">Минуты</option><option value="h">Часы</option><option value="d">Дни</option><option value="mo">Месяцы</option><option value="y">Годы</option><option value="c">Века</option><option value="mil">Тысячелетия</option></select></div></div>
+      <div class="timer-preview" id="timerPreview">Задержка: 1 секунда = 1000 мс</div>
+    </div>
+    <div class="modal-footer"><button id="timerCancelBtn">Отмена</button><button id="timerApplyBtn" class="primary">Применить</button></div>
+  </div>
+</div>
+
+<!-- Sound modal -->
+<div class="modal-overlay" id="soundModal">
+  <div class="modal">
+    <div class="modal-header"><h2>🔊 Настройка звука</h2><button class="modal-close" id="soundCloseBtn">×</button></div>
+    <div class="modal-body">
+      <div class="field"><label>Частота (Гц)</label><div class="slider-row"><input type="range" id="soundFreq" min="50" max="5000" step="1" value="440"><span class="slider-value" id="soundFreqVal">440</span></div></div>
+      <div class="field"><label>Форма волны</label><div class="waveform-row"><button class="wave-btn active" data-wave="sine"><canvas width="60" height="30" data-wave-preview="sine"></canvas><span>Sine</span></button><button class="wave-btn" data-wave="triangle"><canvas width="60" height="30" data-wave-preview="triangle"></canvas><span>Triangle</span></button><button class="wave-btn" data-wave="square"><canvas width="60" height="30" data-wave-preview="square"></canvas><span>Square</span></button></div></div>
+      <div class="field"><label>Длительность звука</label><div class="duration-row"><input type="number" id="soundDurValue" min="1" value="1" step="1"><select id="soundDurUnit"><option value="ms">Миллисекунды</option><option value="s" selected>Секунды</option><option value="m">Минуты</option><option value="h">Часы</option><option value="d">Дни</option><option value="mo">Месяцы</option><option value="y">Годы</option><option value="c">Века</option><option value="mil">Тысячелетия</option></select></div><div class="always-row" id="soundAlwaysRow"><input type="checkbox" id="soundAlways"><label for="soundAlways">Играть всегда, пока на входе 1</label></div></div>
+      <div class="timer-preview" id="soundPreview">Частота: 440 Гц · Sine · 1 секунда</div>
+    </div>
+    <div class="modal-footer"><button id="soundCancelBtn">Отмена</button><button id="soundTestBtn">▶ Проверить</button><button id="soundApplyBtn" class="primary">Применить</button></div>
+  </div>
+</div>
+
+<script>
+(function() {
+  'use strict';
+
+  const VERSION = '1.0';
+  const AUTHOR = 'pytalk2026';
+  const AI = 'DeepSeek';
+
+  const canvas = document.getElementById('canvas');
+  const ctx = canvas.getContext('2d');
+  const container = document.getElementById('canvasContainer');
+  const modeDisplay = document.getElementById('modeDisplay');
+  const zoomIndicator = document.getElementById('zoomIndicator');
+
+  const BASE_ELEM_W = 80;
+  const BASE_ELEM_H = 60;
+  const BASE_PORT_R = 6;
+  const BASE_GEAR_SIZE = 18;
+
+  const SIZE_SCALE = {
+    'very-small': 0.6, 'small': 0.8, 'medium': 1, 'large': 1.2, 'very-large': 1.45
+  };
+
+  let currentSize = localStorage.getItem('logich_size') || 'small';
+  let scale = SIZE_SCALE[currentSize] || 1;
+
+  let ELEM_W, ELEM_H, PORT_R, GEAR_SIZE;
+
+  function updateDimensions() {
+    scale = SIZE_SCALE[currentSize] || 1;
+    ELEM_W = Math.round(BASE_ELEM_W * scale);
+    ELEM_H = Math.round(BASE_ELEM_H * scale);
+    PORT_R = Math.max(3, Math.round(BASE_PORT_R * scale));
+    GEAR_SIZE = Math.max(12, Math.round(BASE_GEAR_SIZE * scale));
+  }
+
+  const STORAGE_KEY = 'logich_schemes_v1';
+  const AUTOSAVE_KEY = 'logich_autosave_v1';
+  const PANEL_KEY = 'logich_panel_state';
+  const FREE_FIELD_KEY = 'logich_free_field_enabled';
+  const VIEW_KEY = 'logich_view_state';
+
+  // ============================================================
+  // СВОБОДНОЕ ПОЛЕ — с плавным зумом и панорамированием
+  // ============================================================
+  let freeFieldEnabled = false;
+
+  // Текущее (показанное) состояние
+  let view = { x: 0, y: 0, zoom: 1 };
+  // Целевое состояние (к которому стремимся)
+  let viewTarget = { x: 0, y: 0, zoom: 1 };
+
+  let isPanning = false;
+  let panStart = { x: 0, y: 0, vx: 0, vy: 0 };
+  let panMoved = false;
+  let rmbDownPos = null;
+  let rmbTarget = null;
+  let rmbIsDown = false;
+
+  try {
+    const savedView = localStorage.getItem(VIEW_KEY);
+    if (savedView) {
+      const v = JSON.parse(savedView);
+      if (typeof v.x === 'number' && typeof v.y === 'number' && typeof v.zoom === 'number') {
+        view = { x: v.x, y: v.y, zoom: Math.max(0.1, Math.min(5, v.zoom)) };
+        viewTarget = { ...view };
+      }
+    }
+  } catch (e) {}
+
+  function saveView() {
+    try { localStorage.setItem(VIEW_KEY, JSON.stringify(viewTarget)); } catch (e) {}
+  }
+
+  function updateZoomIndicator() {
+    zoomIndicator.textContent = `${Math.round(view.zoom * 100)}% · x=${Math.round(view.x)} y=${Math.round(view.y)}`;
+    updateViewInfoText();
+  }
+
+  function updateViewInfoText() {
+    const el = document.getElementById('viewInfoText');
+    if (el) {
+      el.innerHTML = `Текущий масштаб: <b>${Math.round(view.zoom * 100)}%</b> · Позиция: x=${Math.round(view.x)}, y=${Math.round(view.y)}`;
+    }
+  }
+
+  function screenToWorld(sx, sy) {
+    if (!freeFieldEnabled) return { x: sx, y: sy };
+    return { x: (sx - view.x) / view.zoom, y: (sy - view.y) / view.zoom };
+  }
+
+  // Lerp для плавного движения view
+  function lerp(a, b, t) { return a + (b - a) * t; }
+
+  function updateViewAnimation() {
+    const dx = viewTarget.x - view.x;
+    const dy = viewTarget.y - view.y;
+    const dz = viewTarget.zoom - view.zoom;
+
+    if (Math.abs(dx) < 0.1 && Math.abs(dy) < 0.1 && Math.abs(dz) < 0.001) {
+      if (view.x !== viewTarget.x || view.y !== viewTarget.y || view.zoom !== viewTarget.zoom) {
+        view.x = viewTarget.x;
+        view.y = viewTarget.y;
+        view.zoom = viewTarget.zoom;
+        updateZoomIndicator();
+        draw();
+      }
+      return;
+    }
+
+    const t = 0.22;
+    view.x = lerp(view.x, viewTarget.x, t);
+    view.y = lerp(view.y, viewTarget.y, t);
+    view.zoom = lerp(view.zoom, viewTarget.zoom, t);
+
+    updateZoomIndicator();
+    draw();
+  }
+
+  const UNIT_MS = { ms: 1, s: 1000, m: 60000, h: 3600000, d: 86400000, mo: 30*86400000, y: 365*86400000, c: 100*365*86400000, mil: 1000*365*86400000 };
+  const UNIT_LABEL = {
+    ms: { one: 'миллисекунда', few: 'миллисекунды', many: 'миллисекунд' },
+    s: { one: 'секунда', few: 'секунды', many: 'секунд' },
+    m: { one: 'минута', few: 'минуты', many: 'минут' },
+    h: { one: 'час', few: 'часа', many: 'часов' },
+    d: { one: 'день', few: 'дня', many: 'дней' },
+    mo: { one: 'месяц', few: 'месяца', many: 'месяцев' },
+    y: { one: 'год', few: 'года', many: 'лет' },
+    c: { one: 'век', few: 'века', many: 'веков' },
+    mil: { one: 'тысячелетие', few: 'тысячелетия', many: 'тысячелетий' }
+  };
+
+  function pluralForm(n, forms) {
+    const mod10 = n % 10, mod100 = n % 100;
+    if (mod10 === 1 && mod100 !== 11) return forms.one;
+    if (mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20)) return forms.few;
+    return forms.many;
+  }
+
+  let elements = [];
+  let wires = [];
+  let nextId = 1;
+
+  let draggingElem = null;
+  let dragOffX = 0, dragOffY = 0;
+  // Для группы — offsets от курсора до каждого элемента
+  let dragGroupOffsets = null;
+
+  let wireFrom = null;
+  let mouse = { x: 0, y: 0, inside: false };
+  let hoverPort = null;
+  let pressedButton = null;
+
+  let selectedIds = new Set();
+  let selectionRect = null;
+  let isSelecting = false;
+  let dragStartPos = null;
+
+  let hoverTimerGear = null;
+  let hoverSoundGear = null;
+
+  let editingTimerId = null;
+  let editingSoundId = null;
+  let soundDraftWave = 'sine';
+
+  let clipboard = null;
+
+  const MAX_HISTORY = 100;
+  let historyStack = [];
+  let historyIndex = -1;
+
+  function snapshot() {
+    return JSON.stringify({
+      elements: elements.map(e => ({
+        id: e.id, type: e.type, x: e.x, y: e.y, state: e.state,
+        inputs: e.inputs.map(i => ({ dx: i.dx, dy: i.dy })),
+        outputs: e.outputs.map(o => ({ dx: o.dx, dy: o.dy })),
+        timer: e.timer ? { outCount: e.timer.outCount, delay: e.timer.delay, delayValue: e.timer.delayValue, delayUnit: e.timer.delayUnit } : undefined,
+        sound: e.sound ? { freq: e.sound.freq, wave: e.sound.wave, duration: e.sound.duration, durationValue: e.sound.durationValue, durationUnit: e.sound.durationUnit, always: e.sound.always } : undefined,
+        ff: e.ff ? { q: e.ff.q } : undefined
+      })),
+      wires: wires.map(w => ({ fromId: w.fromId, fromPort: w.fromPort, toId: w.toId, toPort: w.toPort })),
+      nextId
+    });
+  }
+
+  function pushHistory() {
+    historyStack = historyStack.slice(0, historyIndex + 1);
+    historyStack.push(snapshot());
+    if (historyStack.length > MAX_HISTORY) { historyStack.shift(); } else { historyIndex++; }
+    if (historyStack.length > MAX_HISTORY) historyIndex = historyStack.length - 1;
+    updateUndoRedoButtons();
+  }
+
+  function restoreFromSnapshot(json) {
+    stopAllSounds();
+    const data = JSON.parse(json);
+    elements = data.elements.map(e => {
+      const elem = { id: e.id, type: e.type, x: e.x, y: e.y, state: e.state || false,
+        inputs: e.inputs.map(i => ({ dx: i.dx, dy: i.dy, val: false, label: i.label })),
+        outputs: (e.outputs || []).map(o => ({ dx: o.dx, dy: o.dy, val: false, label: o.label })) };
+      if (e.type === 'TIMER') { elem.timer = { outCount: e.timer?.outCount || 1, delay: e.timer?.delay || 1000, delayValue: e.timer?.delayValue || 1, delayUnit: e.timer?.delayUnit || 's', history: [], outputValue: false, lastInput: false, lastInputTime: 0 }; rebuildTimerRuntime(elem); }
+      else if (e.type === 'SOUND') { elem.sound = { freq: e.sound?.freq || 440, wave: e.sound?.wave || 'sine', duration: e.sound?.duration || 1000, durationValue: e.sound?.durationValue || 1, durationUnit: e.sound?.durationUnit || 's', always: e.sound?.always || false, lastInput: false, playing: false, stopAt: null }; }
+      else if (e.type === 'DFF' || e.type === 'JKFF' || e.type === 'TFF') { elem.ff = { q: e.ff?.q || false, lastClk: false }; }
+      return elem;
+    });
+    wires = (data.wires || []).map(w => ({ fromId: w.fromId, fromPort: w.fromPort || 0, toId: w.toId, toPort: w.toPort }));
+    nextId = data.nextId || (elements.reduce((m, e) => Math.max(m, e.id), 0) + 1);
+    computeLogic(); draw();
+  }
+
+  function undo() { if (historyIndex <= 0) return; historyIndex--; restoreFromSnapshot(historyStack[historyIndex]); updateUndoRedoButtons(); scheduleAutoSave(); showToast('↶ Отменено'); }
+  function redo() { if (historyIndex >= historyStack.length - 1) return; historyIndex++; restoreFromSnapshot(historyStack[historyIndex]); updateUndoRedoButtons(); scheduleAutoSave(); showToast('↷ Возвращено'); }
+  function updateUndoRedoButtons() {
+    document.getElementById('undoBtn').disabled = historyIndex <= 0;
+    document.getElementById('redoBtn').disabled = historyIndex >= historyStack.length - 1;
+  }
+
+  let audioCtx = null;
+  function getAudioCtx() {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    return audioCtx;
+  }
+  const activeSounds = new Map();
+  function startSound(elem) {
+    stopSound(elem.id);
+    try {
+      const actx = getAudioCtx();
+      const osc = actx.createOscillator();
+      const gain = actx.createGain();
+      osc.type = elem.sound.wave;
+      osc.frequency.value = elem.sound.freq;
+      gain.gain.value = 0.15;
+      osc.connect(gain); gain.connect(actx.destination); osc.start();
+      activeSounds.set(elem.id, { osc, gain, stopAt: elem.sound.always ? null : performance.now() + elem.sound.duration });
+    } catch (e) { console.warn(e); }
+  }
+  function stopSound(elemId) {
+    const entry = activeSounds.get(elemId); if (!entry) return;
+    try { entry.osc.stop(); entry.osc.disconnect(); entry.gain.disconnect(); } catch (e) {}
+    activeSounds.delete(elemId);
+  }
+  function stopAllSounds() { [...activeSounds.keys()].forEach(id => stopSound(id)); }
+
+  function resizeCanvas() {
+    const r = container.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = r.width * dpr;
+    canvas.height = r.height * dpr;
+    canvas.style.width = r.width + 'px';
+    canvas.style.height = r.height + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    canvas._w = r.width; canvas._h = r.height;
+    draw();
+  }
+
+  function applySize(size) {
+    currentSize = size;
+    localStorage.setItem('logich_size', size);
+    document.body.className = 'size-' + size + (freeFieldEnabled ? ' free-field' : '');
+    updateDimensions();
+    document.querySelectorAll('.settings-size-option').forEach(opt => opt.classList.toggle('active', opt.dataset.size === size));
+    setTimeout(resizeCanvas, 50);
+    rebuildAllPortPositions();
+    draw();
+  }
+
+  function rebuildAllPortPositions() {
+    elements.forEach(elem => {
+      if (elem.type === 'NOT') {
+        elem.inputs = [{ dx: 0, dy: ELEM_H/2, val: elem.inputs[0]?.val || false }];
+        elem.outputs = [{ dx: ELEM_W, dy: ELEM_H/2, val: elem.outputs[0]?.val || false }];
+      } else if (elem.type === 'AND' || elem.type === 'OR' || elem.type === 'XOR') {
+        elem.inputs = [{ dx: 0, dy: ELEM_H*0.3, val: elem.inputs[0]?.val || false }, { dx: 0, dy: ELEM_H*0.7, val: elem.inputs[1]?.val || false }];
+        elem.outputs = [{ dx: ELEM_W, dy: ELEM_H/2, val: elem.outputs[0]?.val || false }];
+      } else if (elem.type === 'SPLIT') {
+        elem.inputs = [{ dx: 0, dy: ELEM_H/2, val: elem.inputs[0]?.val || false }];
+        elem.outputs = [{ dx: ELEM_W, dy: ELEM_H*0.3, val: elem.outputs[0]?.val || false }, { dx: ELEM_W, dy: ELEM_H*0.7, val: elem.outputs[1]?.val || false }];
+      } else if (elem.type === 'SWITCH' || elem.type === 'BUTTON') {
+        elem.outputs = [{ dx: ELEM_W, dy: ELEM_H/2, val: elem.outputs[0]?.val || false }];
+      } else if (elem.type === 'LAMP' || elem.type === 'SOUND') {
+        elem.inputs = [{ dx: 0, dy: ELEM_H/2, val: elem.inputs[0]?.val || false }];
+      } else if (elem.type === 'TIMER') {
+        elem.inputs = [{ dx: 0, dy: ELEM_H/2, val: elem.inputs[0]?.val || false }];
+        const n = elem.timer.outCount;
+        const oldVals = elem.outputs.map(o => o.val);
+        elem.outputs = [];
+        for (let i = 0; i < n; i++) {
+          const yRatio = n === 1 ? 0.5 : 0.15 + (0.7 * i / (n - 1));
+          elem.outputs.push({ dx: ELEM_W, dy: ELEM_H * yRatio, val: oldVals[i] || false });
+        }
+      } else if (elem.type === 'DFF') {
+        elem.inputs = [{ dx: ELEM_W/2, dy: 0, val: elem.inputs[0]?.val || false, label: 'CLK' }, { dx: 0, dy: ELEM_H/2, val: elem.inputs[1]?.val || false, label: 'D' }];
+        elem.outputs = [{ dx: ELEM_W, dy: ELEM_H*0.3, val: elem.outputs[0]?.val || false, label: 'Q' }, { dx: ELEM_W, dy: ELEM_H*0.7, val: elem.outputs[1]?.val || false, label: 'Q̄' }];
+      } else if (elem.type === 'JKFF') {
+        elem.inputs = [{ dx: ELEM_W/2, dy: 0, val: elem.inputs[0]?.val || false, label: 'CLK' }, { dx: 0, dy: ELEM_H*0.3, val: elem.inputs[1]?.val || false, label: 'J' }, { dx: 0, dy: ELEM_H*0.7, val: elem.inputs[2]?.val || false, label: 'K' }];
+        elem.outputs = [{ dx: ELEM_W, dy: ELEM_H*0.3, val: elem.outputs[0]?.val || false, label: 'Q' }, { dx: ELEM_W, dy: ELEM_H*0.7, val: elem.outputs[1]?.val || false, label: 'Q̄' }];
+      } else if (elem.type === 'TFF') {
+        elem.inputs = [{ dx: ELEM_W/2, dy: 0, val: elem.inputs[0]?.val || false, label: 'CLK' }, { dx: 0, dy: ELEM_H/2, val: elem.inputs[1]?.val || false, label: 'T' }];
+        elem.outputs = [{ dx: ELEM_W, dy: ELEM_H*0.3, val: elem.outputs[0]?.val || false, label: 'Q' }, { dx: ELEM_W, dy: ELEM_H*0.7, val: elem.outputs[1]?.val || false, label: 'Q̄' }];
+      } else if (elem.type === 'MUX') {
+        elem.inputs = [{ dx: 0, dy: ELEM_H*0.15, val: elem.inputs[0]?.val || false, label: '0' }, { dx: 0, dy: ELEM_H*0.4, val: elem.inputs[1]?.val || false, label: '1' }, { dx: 0, dy: ELEM_H*0.6, val: elem.inputs[2]?.val || false, label: '2' }, { dx: 0, dy: ELEM_H*0.85, val: elem.inputs[3]?.val || false, label: '3' }, { dx: ELEM_W*0.35, dy: ELEM_H, val: elem.inputs[4]?.val || false, label: 'S0' }, { dx: ELEM_W*0.65, dy: ELEM_H, val: elem.inputs[5]?.val || false, label: 'S1' }];
+        elem.outputs = [{ dx: ELEM_W, dy: ELEM_H/2, val: elem.outputs[0]?.val || false }];
+      } else if (elem.type === 'DEMUX') {
+        elem.inputs = [{ dx: 0, dy: ELEM_H/2, val: elem.inputs[0]?.val || false, label: 'D' }, { dx: ELEM_W*0.35, dy: ELEM_H, val: elem.inputs[1]?.val || false, label: 'S0' }, { dx: ELEM_W*0.65, dy: ELEM_H, val: elem.inputs[2]?.val || false, label: 'S1' }];
+        elem.outputs = [{ dx: ELEM_W, dy: ELEM_H*0.15, val: elem.outputs[0]?.val || false, label: '0' }, { dx: ELEM_W, dy: ELEM_H*0.4, val: elem.outputs[1]?.val || false, label: '1' }, { dx: ELEM_W, dy: ELEM_H*0.6, val: elem.outputs[2]?.val || false, label: '2' }, { dx: ELEM_W, dy: ELEM_H*0.85, val: elem.outputs[3]?.val || false, label: '3' }];
+      }
+    });
+  }
+
+  window.addEventListener('resize', resizeCanvas);
+
+  function createElem(type, x, y, opts = {}) {
+    const elem = { id: nextId++, type, x, y, inputs: [], outputs: [], state: false };
+    if (type === 'NOT') { elem.inputs = [{ dx: 0, dy: ELEM_H/2, val: false }]; elem.outputs = [{ dx: ELEM_W, dy: ELEM_H/2, val: false }]; }
+    else if (type === 'AND' || type === 'OR' || type === 'XOR') { elem.inputs = [{ dx: 0, dy: ELEM_H*0.3, val: false }, { dx: 0, dy: ELEM_H*0.7, val: false }]; elem.outputs = [{ dx: ELEM_W, dy: ELEM_H/2, val: false }]; }
+    else if (type === 'SPLIT') { elem.inputs = [{ dx: 0, dy: ELEM_H/2, val: false }]; elem.outputs = [{ dx: ELEM_W, dy: ELEM_H*0.3, val: false }, { dx: ELEM_W, dy: ELEM_H*0.7, val: false }]; }
+    else if (type === 'TIMER') { elem.inputs = [{ dx: 0, dy: ELEM_H/2, val: false }]; elem.timer = { outCount: opts.timer?.outCount || 1, delay: opts.timer?.delay || 1000, delayValue: opts.timer?.delayValue || 1, delayUnit: opts.timer?.delayUnit || 's', history: [], outputValue: false, lastInput: false, lastInputTime: 0 }; rebuildTimerRuntime(elem); }
+    else if (type === 'SOUND') { elem.inputs = [{ dx: 0, dy: ELEM_H/2, val: false }]; elem.sound = { freq: opts.sound?.freq || 440, wave: opts.sound?.wave || 'sine', duration: opts.sound?.duration || 1000, durationValue: opts.sound?.durationValue || 1, durationUnit: opts.sound?.durationUnit || 's', always: opts.sound?.always || false, lastInput: false, playing: false, stopAt: null }; }
+    else if (type === 'SWITCH' || type === 'BUTTON') { elem.outputs = [{ dx: ELEM_W, dy: ELEM_H/2, val: false }]; }
+    else if (type === 'LAMP') { elem.inputs = [{ dx: 0, dy: ELEM_H/2, val: false }]; }
+    else if (type === 'DFF') { elem.inputs = [{ dx: ELEM_W/2, dy: 0, val: false, label: 'CLK' }, { dx: 0, dy: ELEM_H/2, val: false, label: 'D' }]; elem.outputs = [{ dx: ELEM_W, dy: ELEM_H*0.3, val: false, label: 'Q' }, { dx: ELEM_W, dy: ELEM_H*0.7, val: false, label: 'Q̄' }]; elem.ff = { q: false, lastClk: false }; }
+    else if (type === 'JKFF') { elem.inputs = [{ dx: ELEM_W/2, dy: 0, val: false, label: 'CLK' }, { dx: 0, dy: ELEM_H*0.3, val: false, label: 'J' }, { dx: 0, dy: ELEM_H*0.7, val: false, label: 'K' }]; elem.outputs = [{ dx: ELEM_W, dy: ELEM_H*0.3, val: false, label: 'Q' }, { dx: ELEM_W, dy: ELEM_H*0.7, val: false, label: 'Q̄' }]; elem.ff = { q: false, lastClk: false }; }
+    else if (type === 'TFF') { elem.inputs = [{ dx: ELEM_W/2, dy: 0, val: false, label: 'CLK' }, { dx: 0, dy: ELEM_H/2, val: false, label: 'T' }]; elem.outputs = [{ dx: ELEM_W, dy: ELEM_H*0.3, val: false, label: 'Q' }, { dx: ELEM_W, dy: ELEM_H*0.7, val: false, label: 'Q̄' }]; elem.ff = { q: false, lastClk: false }; }
+    else if (type === 'MUX') { elem.inputs = [{ dx: 0, dy: ELEM_H*0.15, val: false, label: '0' }, { dx: 0, dy: ELEM_H*0.4, val: false, label: '1' }, { dx: 0, dy: ELEM_H*0.6, val: false, label: '2' }, { dx: 0, dy: ELEM_H*0.85, val: false, label: '3' }, { dx: ELEM_W*0.35, dy: ELEM_H, val: false, label: 'S0' }, { dx: ELEM_W*0.65, dy: ELEM_H, val: false, label: 'S1' }]; elem.outputs = [{ dx: ELEM_W, dy: ELEM_H/2, val: false }]; }
+    else if (type === 'DEMUX') { elem.inputs = [{ dx: 0, dy: ELEM_H/2, val: false, label: 'D' }, { dx: ELEM_W*0.35, dy: ELEM_H, val: false, label: 'S0' }, { dx: ELEM_W*0.65, dy: ELEM_H, val: false, label: 'S1' }]; elem.outputs = [{ dx: ELEM_W, dy: ELEM_H*0.15, val: false, label: '0' }, { dx: ELEM_W, dy: ELEM_H*0.4, val: false, label: '1' }, { dx: ELEM_W, dy: ELEM_H*0.6, val: false, label: '2' }, { dx: ELEM_W, dy: ELEM_H*0.85, val: false, label: '3' }]; }
+    elements.push(elem);
+    return elem;
+  }
+
+  function rebuildTimerRuntime(elem) {
+    const n = elem.timer.outCount;
+    elem.outputs = [];
+    for (let i = 0; i < n; i++) {
+      const yRatio = n === 1 ? 0.5 : 0.15 + (0.7 * i / (n - 1));
+      elem.outputs.push({ dx: ELEM_W, dy: ELEM_H * yRatio, val: elem.timer.outputValue });
+    }
+  }
+
+  function inPos(elem, idx) { const i = elem.inputs[idx]; return { x: elem.x + i.dx, y: elem.y + i.dy }; }
+  function outPos(elem, idx) { const o = elem.outputs[idx]; return { x: elem.x + o.dx, y: elem.y + o.dy }; }
+  function gearPos(elem) { return { x: elem.x + ELEM_W - GEAR_SIZE/2 - 4, y: elem.y + GEAR_SIZE/2 + 4 }; }
+
+  function draw() {
+    const W = canvas._w, H = canvas._h;
+    ctx.clearRect(0, 0, W, H);
+    ctx.strokeStyle = '#232338'; ctx.lineWidth = 1;
+    if (freeFieldEnabled) {
+      let gridStep = 40 * view.zoom;
+      while (gridStep < 20) gridStep *= 2;
+      while (gridStep > 200) gridStep /= 2;
+      const offsetX = view.x % gridStep;
+      const offsetY = view.y % gridStep;
+      for (let x = offsetX; x < W; x += gridStep) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke(); }
+      for (let y = offsetY; y < H; y += gridStep) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
+    } else {
+      for (let x = 0; x < W; x += 40) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke(); }
+      for (let y = 0; y < H; y += 40) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
+    }
+
+    ctx.save();
+    if (freeFieldEnabled) { ctx.translate(view.x, view.y); ctx.scale(view.zoom, view.zoom); }
+
+    wires.forEach(w => {
+      const from = elements.find(e => e.id === w.fromId);
+      const to = elements.find(e => e.id === w.toId);
+      if (!from || !to) return;
+      if (!from.outputs[w.fromPort || 0] || !to.inputs[w.toPort]) return;
+      const p1 = outPos(from, w.fromPort || 0);
+      const p2 = inPos(to, w.toPort);
+      const active = from.outputs[w.fromPort || 0].val;
+      ctx.beginPath(); ctx.moveTo(p1.x, p1.y);
+      const cp1x = p1.x + 50, cp2x = p2.x - 50;
+      ctx.bezierCurveTo(cp1x, p1.y, cp2x, p2.y, p2.x, p2.y);
+      ctx.strokeStyle = active ? '#8aff8a' : '#5a5a8a';
+      ctx.lineWidth = 3 * Math.max(0.6, scale);
+      ctx.shadowColor = active ? '#8aff8a' : 'transparent';
+      ctx.shadowBlur = active ? 8 : 0;
+      ctx.stroke(); ctx.shadowBlur = 0;
+    });
+
+    if (wireFrom && mouse.inside) {
+      const fromElem = elements.find(e => e.id === wireFrom.id);
+      if (fromElem && fromElem.outputs[wireFrom.portIndex]) {
+        const p1 = outPos(fromElem, wireFrom.portIndex);
+        const p2 = { x: mouse.x, y: mouse.y };
+        let snapIn = null;
+        if (hoverPort && hoverPort.type === 'in' && hoverPort.id !== wireFrom.id) { snapIn = hoverPort; p2.x = snapIn.x; p2.y = snapIn.y; }
+        ctx.beginPath(); ctx.moveTo(p1.x, p1.y);
+        const cp1x = p1.x + 50, cp2x = p2.x - 50;
+        ctx.bezierCurveTo(cp1x, p1.y, cp2x, p2.y, p2.x, p2.y);
+        ctx.strokeStyle = snapIn ? '#8aff8a' : '#b0b0ff';
+        ctx.lineWidth = 3 * Math.max(0.6, scale);
+        ctx.setLineDash([6, 6]);
+        ctx.shadowColor = snapIn ? '#8aff8a' : '#b0b0ff';
+        ctx.shadowBlur = 10;
+        ctx.stroke(); ctx.setLineDash([]); ctx.shadowBlur = 0;
+        ctx.beginPath(); ctx.arc(mouse.x, mouse.y, 4, 0, Math.PI*2);
+        ctx.fillStyle = snapIn ? '#8aff8a' : '#b0b0ff'; ctx.fill();
+      }
+    }
+
+    elements.forEach(elem => {
+      const x = elem.x, y = elem.y, w = ELEM_W, h = ELEM_H;
+      const isSelected = selectedIds.has(elem.id);
+      ctx.shadowColor = 'rgba(0,0,0,.5)'; ctx.shadowBlur = 10; ctx.shadowOffsetY = 3;
+      ctx.fillStyle = '#2f2f48'; ctx.strokeStyle = '#6a6a9a'; ctx.lineWidth = 2;
+      const cornerR = 10 * scale;
+
+      if (elem.type === 'NOT') {
+        ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + w, y + h/2); ctx.lineTo(x, y + h); ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.beginPath(); ctx.arc(x + w + 5*scale, y + h/2, 4*scale, 0, Math.PI*2); ctx.fillStyle = '#2f2f48'; ctx.fill(); ctx.strokeStyle = '#6a6a9a'; ctx.stroke();
+      } else if (elem.type === 'SWITCH') {
+        ctx.beginPath(); roundRect(ctx, x, y, w, h, cornerR);
+        ctx.fillStyle = elem.state ? '#3a5a3a' : '#2f2f48'; ctx.fill();
+        ctx.strokeStyle = elem.state ? '#8aff8a' : '#6a6a9a'; ctx.stroke();
+        const knobW = 24*scale, knobH = 18*scale; const knobY = y + h/2 - knobH/2; const knobX = elem.state ? x + w - knobW - 6*scale : x + 6*scale;
+        ctx.beginPath(); roundRect(ctx, knobX, knobY, knobW, knobH, 6*scale);
+        ctx.fillStyle = elem.state ? '#8aff8a' : '#6a6a9a'; ctx.shadowColor = elem.state ? '#8aff8a' : 'transparent'; ctx.shadowBlur = elem.state ? 12 : 0; ctx.fill(); ctx.shadowBlur = 0;
+      } else if (elem.type === 'BUTTON') {
+        const isPressed = (pressedButton === elem);
+        ctx.beginPath(); roundRect(ctx, x, y, w, h, cornerR);
+        ctx.fillStyle = isPressed ? '#5a3a5a' : '#2f2f48'; ctx.fill();
+        ctx.strokeStyle = isPressed ? '#ff88ff' : '#6a6a9a'; ctx.stroke();
+        const cx = x + w/2, cy = y + h/2, r = 16*scale;
+        ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI*2);
+        const grad = ctx.createRadialGradient(cx - 4, cy - 4, 2, cx, cy, r);
+        if (isPressed) { grad.addColorStop(0, '#ffccff'); grad.addColorStop(1, '#aa44aa'); } else { grad.addColorStop(0, '#7a7aa0'); grad.addColorStop(1, '#4a4a6a'); }
+        ctx.fillStyle = grad; ctx.shadowColor = isPressed ? '#ff88ff' : 'transparent'; ctx.shadowBlur = isPressed ? 16 : 0; ctx.fill(); ctx.shadowBlur = 0;
+        ctx.strokeStyle = isPressed ? '#ff88ff' : '#9a9ac0'; ctx.stroke();
+      } else if (elem.type === 'LAMP') {
+        const isOn = elem.inputs[0].val;
+        ctx.beginPath(); roundRect(ctx, x, y, w, h, cornerR);
+        ctx.fillStyle = isOn ? '#4a4a2a' : '#2f2f48'; ctx.fill();
+        ctx.strokeStyle = isOn ? '#ffff77' : '#6a6a9a'; ctx.stroke();
+        const cx = x + w/2, cy = y + h/2 - 4*scale, r = 16*scale;
+        ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI*2);
+        const grad = ctx.createRadialGradient(cx - 4, cy - 6, 2, cx, cy, r);
+        if (isOn) { grad.addColorStop(0, '#ffffcc'); grad.addColorStop(1, '#ffcc33'); } else { grad.addColorStop(0, '#5a5a70'); grad.addColorStop(1, '#3a3a4a'); }
+        ctx.fillStyle = grad; ctx.shadowColor = isOn ? '#ffff77' : 'transparent'; ctx.shadowBlur = isOn ? 25 : 0; ctx.fill(); ctx.shadowBlur = 0;
+        ctx.strokeStyle = isOn ? '#ffff77' : '#9a9ac0'; ctx.lineWidth = 1.5; ctx.stroke();
+        ctx.beginPath(); ctx.rect(cx - 6*scale, cy + r - 2*scale, 12*scale, 8*scale); ctx.fillStyle = isOn ? '#ffcc33' : '#6a6a8a'; ctx.fill(); ctx.strokeStyle = isOn ? '#ffff77' : '#9a9ac0'; ctx.stroke();
+        if (isOn) {
+          ctx.strokeStyle = '#ffff77'; ctx.lineWidth = 2;
+          for (let a = 0; a < Math.PI*2; a += Math.PI/4) {
+            const x1 = cx + Math.cos(a) * (r + 4*scale), y1 = cy + Math.sin(a) * (r + 4*scale);
+            const x2 = cx + Math.cos(a) * (r + 9*scale), y2 = cy + Math.sin(a) * (r + 9*scale);
+            ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+          }
+        }
+      } else if (elem.type === 'SPLIT') {
+        ctx.beginPath(); roundRect(ctx, x, y, w, h, cornerR); ctx.fill(); ctx.stroke();
+        ctx.strokeStyle = '#c0a0ff'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(x + 20*scale, y + h/2); ctx.lineTo(x + w - 20*scale, y + h/2); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(x + w - 20*scale, y + h/2); ctx.lineTo(x + w - 10*scale, y + h*0.3); ctx.moveTo(x + w - 20*scale, y + h/2); ctx.lineTo(x + w - 10*scale, y + h*0.7); ctx.stroke();
+      } else if (elem.type === 'TIMER') {
+        ctx.beginPath(); roundRect(ctx, x, y, w, h, cornerR);
+        ctx.fillStyle = '#2a3a4a'; ctx.fill();
+        ctx.strokeStyle = elem.timer.outputValue ? '#66ddff' : '#5a8aaa'; ctx.stroke();
+        ctx.strokeStyle = '#66ddff'; ctx.lineWidth = 2 * Math.max(0.6, scale);
+        const clockCX = x + w/2 - 12*scale, clockCY = y + h/2;
+        ctx.beginPath(); ctx.arc(clockCX, clockCY, 12*scale, 0, Math.PI*2); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(clockCX, clockCY); ctx.lineTo(clockCX, clockCY - 7*scale); ctx.moveTo(clockCX, clockCY); ctx.lineTo(clockCX + 6*scale, clockCY); ctx.stroke();
+        ctx.fillStyle = '#a0d0ff'; ctx.font = 'bold ' + Math.max(8, Math.round(10*scale)) + 'px "Segoe UI", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText(elem.timer.outCount + 'x', x + w/2 + 14*scale, y + h/2);
+        const gp = gearPos(elem); const isHover = hoverTimerGear === elem.id;
+        ctx.beginPath(); ctx.arc(gp.x, gp.y, GEAR_SIZE/2, 0, Math.PI*2);
+        ctx.fillStyle = isHover ? '#66ddff' : '#3a5a7a'; ctx.fill();
+        ctx.strokeStyle = isHover ? '#aaeaff' : '#66aadd'; ctx.lineWidth = 1.5; ctx.stroke();
+        ctx.fillStyle = isHover ? '#1a2a3a' : '#aaeaff'; ctx.font = 'bold ' + Math.round(GEAR_SIZE * 0.65) + 'px "Segoe UI", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('⚙', gp.x, gp.y + 1);
+      } else if (elem.type === 'SOUND') {
+        const isPlaying = activeSounds.has(elem.id);
+        ctx.beginPath(); roundRect(ctx, x, y, w, h, cornerR);
+        ctx.fillStyle = isPlaying ? '#4a2a4a' : '#2f2f48'; ctx.fill();
+        ctx.strokeStyle = isPlaying ? '#ff99cc' : '#8a5a7a'; ctx.stroke();
+        const cx = x + w/2 - 10*scale, cy = y + h/2;
+        ctx.fillStyle = isPlaying ? '#ffccdd' : '#c080a0';
+        ctx.beginPath(); ctx.moveTo(cx - 10*scale, cy - 6*scale); ctx.lineTo(cx - 4*scale, cy - 6*scale); ctx.lineTo(cx + 2*scale, cy - 11*scale); ctx.lineTo(cx + 2*scale, cy + 11*scale); ctx.lineTo(cx - 4*scale, cy + 6*scale); ctx.lineTo(cx - 10*scale, cy + 6*scale); ctx.closePath(); ctx.fill();
+        ctx.strokeStyle = isPlaying ? '#ffccdd' : '#c080a0'; ctx.lineWidth = 2 * Math.max(0.6, scale);
+        ctx.beginPath(); ctx.arc(cx + 3*scale, cy, 5*scale, -Math.PI/3, Math.PI/3); ctx.stroke();
+        if (isPlaying) { ctx.beginPath(); ctx.arc(cx + 3*scale, cy, 9*scale, -Math.PI/3, Math.PI/3); ctx.stroke(); ctx.shadowColor = '#ff99cc'; ctx.shadowBlur = 12; ctx.stroke(); ctx.shadowBlur = 0; }
+        ctx.fillStyle = '#e0c0d0'; ctx.font = 'bold ' + Math.max(7, Math.round(9*scale)) + 'px "Segoe UI", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText(Math.round(elem.sound.freq) + 'Hz', x + w/2 + 20*scale, y + h/2);
+        const gp = gearPos(elem); const isHover = hoverSoundGear === elem.id;
+        ctx.beginPath(); ctx.arc(gp.x, gp.y, GEAR_SIZE/2, 0, Math.PI*2);
+        ctx.fillStyle = isHover ? '#ff99cc' : '#5a3a5a'; ctx.fill();
+        ctx.strokeStyle = isHover ? '#ffccdd' : '#aa77aa'; ctx.lineWidth = 1.5; ctx.stroke();
+        ctx.fillStyle = isHover ? '#2a1a2a' : '#ffccdd'; ctx.font = 'bold ' + Math.round(GEAR_SIZE * 0.65) + 'px "Segoe UI", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('⚙', gp.x, gp.y + 1);
+      } else if (elem.type === 'DFF' || elem.type === 'JKFF' || elem.type === 'TFF') {
+        ctx.beginPath(); roundRect(ctx, x, y, w, h, cornerR);
+        ctx.fillStyle = '#1f2f2a'; ctx.fill();
+        ctx.strokeStyle = elem.ff.q ? '#66ffaa' : '#4a7a5a'; ctx.stroke();
+        ctx.fillStyle = '#a0ffcc'; ctx.font = 'bold ' + Math.max(9, Math.round(12*scale)) + 'px "Segoe UI", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText(elem.type, x + w/2, y + h/2 - 4*scale);
+        ctx.fillStyle = elem.ff.q ? '#66ffaa' : '#6a8a7a'; ctx.font = 'bold ' + Math.max(8, Math.round(10*scale)) + 'px "Consolas", monospace';
+        ctx.fillText(elem.ff.q ? 'Q=1' : 'Q=0', x + w/2, y + h/2 + 12*scale);
+      } else if (elem.type === 'MUX' || elem.type === 'DEMUX') {
+        ctx.beginPath(); roundRect(ctx, x, y, w, h, cornerR);
+        ctx.fillStyle = '#2a2a3a'; ctx.fill();
+        ctx.strokeStyle = '#ffaa66'; ctx.stroke();
+        ctx.strokeStyle = '#ffaa66'; ctx.lineWidth = 1.5 * Math.max(0.6, scale);
+        ctx.beginPath();
+        if (elem.type === 'MUX') { ctx.moveTo(x + w*0.15, y + h*0.15); ctx.lineTo(x + w*0.15, y + h*0.85); ctx.lineTo(x + w*0.85, y + h*0.65); ctx.lineTo(x + w*0.85, y + h*0.35); ctx.closePath(); }
+        else { ctx.moveTo(x + w*0.15, y + h*0.35); ctx.lineTo(x + w*0.15, y + h*0.65); ctx.lineTo(x + w*0.85, y + h*0.85); ctx.lineTo(x + w*0.85, y + h*0.15); ctx.closePath(); }
+        ctx.stroke();
+        ctx.fillStyle = '#ffcc99'; ctx.font = 'bold ' + Math.max(8, Math.round(11*scale)) + 'px "Segoe UI", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText(elem.type, x + w/2, y + h/2);
+      } else {
+        ctx.beginPath(); roundRect(ctx, x, y, w, h, cornerR); ctx.fill(); ctx.stroke();
+      }
+
+      ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
+
+      ctx.fillStyle = '#e0e0ff'; ctx.font = 'bold ' + Math.max(9, Math.round(13*scale)) + 'px "Segoe UI", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      if (elem.type === 'SWITCH') { ctx.font = 'bold ' + Math.max(8, Math.round(11*scale)) + 'px "Segoe UI", sans-serif'; ctx.fillText(elem.state ? 'ON' : 'OFF', x + w/2, y + 14*scale); }
+      else if (elem.type === 'BUTTON' || elem.type === 'LAMP' || elem.type === 'TIMER' || elem.type === 'SOUND' || elem.type === 'DFF' || elem.type === 'JKFF' || elem.type === 'TFF' || elem.type === 'MUX' || elem.type === 'DEMUX') {}
+      else if (elem.type === 'SPLIT') { ctx.font = 'bold ' + Math.max(8, Math.round(11*scale)) + 'px "Segoe UI", sans-serif'; ctx.fillText('1→2', x + w/2, y + h - 8*scale); }
+      else if (elem.type !== 'NOT') { ctx.fillText(elem.type, x + w/2, y + h/2); }
+
+      const showLabels = (elem.type === 'DFF' || elem.type === 'JKFF' || elem.type === 'TFF' || elem.type === 'MUX' || elem.type === 'DEMUX');
+
+      elem.inputs.forEach((inp, idx) => {
+        const px = x + inp.dx, py = y + inp.dy;
+        const isSnapTarget = wireFrom && hoverPort && hoverPort.id === elem.id && hoverPort.type === 'in' && hoverPort.idx === idx && hoverPort.id !== wireFrom.id;
+        ctx.beginPath(); ctx.arc(px, py, PORT_R, 0, Math.PI*2);
+        ctx.fillStyle = inp.val ? '#8aff8a' : (isSnapTarget ? '#b0b0ff' : '#4a4a6a'); ctx.fill();
+        ctx.strokeStyle = isSnapTarget ? '#b0b0ff' : '#9a9ac0'; ctx.lineWidth = isSnapTarget ? 2.5 : 1.5; ctx.stroke();
+        if (isSnapTarget) { ctx.beginPath(); ctx.arc(px, py, PORT_R + 6, 0, Math.PI*2); ctx.strokeStyle = '#b0b0ff'; ctx.lineWidth = 2; ctx.stroke(); }
+        else if (hoverPort && hoverPort.id === elem.id && hoverPort.type === 'in' && hoverPort.idx === idx) { ctx.beginPath(); ctx.arc(px, py, PORT_R + 4, 0, Math.PI*2); ctx.strokeStyle = '#b0b0ff'; ctx.lineWidth = 2; ctx.stroke(); }
+        if (showLabels && inp.label) {
+          ctx.fillStyle = '#a0a0c0'; ctx.font = 'bold ' + Math.max(6, Math.round(8*scale)) + 'px "Consolas", monospace'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+          const offsetX = inp.dx < 10 ? 10*scale : (inp.dx > ELEM_W - 10 ? -10*scale : 0);
+          const offsetY = inp.dy < 10 ? 10*scale : (inp.dy > ELEM_H - 10 ? -10*scale : 0);
+          ctx.fillText(inp.label, px + offsetX, py + offsetY);
+        }
+      });
+
+      elem.outputs.forEach((out, idx) => {
+        const op = outPos(elem, idx);
+        const isFromPort = wireFrom && wireFrom.id === elem.id && wireFrom.portIndex === idx;
+        ctx.beginPath(); ctx.arc(op.x, op.y, PORT_R, 0, Math.PI*2);
+        ctx.fillStyle = out.val ? '#8aff8a' : (isFromPort ? '#b0b0ff' : '#4a4a6a'); ctx.fill();
+        ctx.strokeStyle = isFromPort ? '#b0b0ff' : '#9a9ac0'; ctx.lineWidth = isFromPort ? 2.5 : 1.5; ctx.stroke();
+        if (isFromPort) { ctx.beginPath(); ctx.arc(op.x, op.y, PORT_R + 6, 0, Math.PI*2); ctx.strokeStyle = '#b0b0ff'; ctx.lineWidth = 2; ctx.stroke(); }
+        else if (hoverPort && hoverPort.id === elem.id && hoverPort.type === 'out' && hoverPort.idx === idx) { ctx.beginPath(); ctx.arc(op.x, op.y, PORT_R + 4, 0, Math.PI*2); ctx.strokeStyle = '#b0b0ff'; ctx.lineWidth = 2; ctx.stroke(); }
+        if (showLabels && out.label) {
+          ctx.fillStyle = '#a0a0c0'; ctx.font = 'bold ' + Math.max(6, Math.round(8*scale)) + 'px "Consolas", monospace'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+          const offsetX = out.dx > ELEM_W - 10 ? -10*scale : 10*scale;
+          ctx.fillText(out.label, op.x + offsetX, op.y);
+        }
+      });
+
+      if (isSelected) {
+        ctx.strokeStyle = '#8a8aff'; ctx.lineWidth = 2.5 / (freeFieldEnabled ? view.zoom : 1);
+        ctx.setLineDash([5 / (freeFieldEnabled ? view.zoom : 1), 4 / (freeFieldEnabled ? view.zoom : 1)]);
+        ctx.shadowColor = '#8a8aff'; ctx.shadowBlur = 10;
+        roundRect(ctx, x - 4, y - 4, w + 8, h + 8, 12); ctx.stroke();
+        ctx.setLineDash([]); ctx.shadowBlur = 0;
+      }
+    });
+
+    if (isSelecting && selectionRect) {
+      const { x1, y1, x2, y2 } = selectionRect;
+      const rx = Math.min(x1, x2), ry = Math.min(y1, y2);
+      const rw = Math.abs(x2 - x1), rh = Math.abs(y2 - y1);
+      ctx.fillStyle = 'rgba(138, 138, 255, 0.12)'; ctx.fillRect(rx, ry, rw, rh);
+      ctx.strokeStyle = '#8a8aff'; ctx.lineWidth = 1.5 / (freeFieldEnabled ? view.zoom : 1);
+      ctx.setLineDash([6 / (freeFieldEnabled ? view.zoom : 1), 4 / (freeFieldEnabled ? view.zoom : 1)]);
+      ctx.strokeRect(rx, ry, rw, rh); ctx.setLineDash([]);
+    }
+
+    ctx.restore();
+  }
+
+  function roundRect(ctx, x, y, w, h, r) {
+    r = Math.min(r, w/2, h/2);
+    ctx.beginPath();
+    ctx.moveTo(x + r, y); ctx.lineTo(x + w - r, y);
+    ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+    ctx.lineTo(x + w, y + h - r);
+    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+    ctx.lineTo(x + r, y + h);
+    ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+    ctx.lineTo(x, y + r);
+    ctx.quadraticCurveTo(x, y, x + r, y);
+    ctx.closePath();
+  }
+
+  function computeLogic() {
+    for (let iter = 0; iter < 100; iter++) {
+      let changed = false;
+      elements.forEach(e => e.inputs.forEach(i => i.val = false));
+      wires.forEach(w => {
+        const from = elements.find(e => e.id === w.fromId);
+        const to = elements.find(e => e.id === w.toId);
+        if (from && to && to.inputs[w.toPort]) {
+          const outVal = from.outputs[w.fromPort || 0]?.val;
+          if (outVal !== undefined) to.inputs[w.toPort].val = outVal;
+        }
+      });
+      elements.forEach(elem => {
+        let newVals = [];
+        if (elem.type === 'SWITCH') newVals = [elem.state];
+        else if (elem.type === 'BUTTON') newVals = [pressedButton === elem];
+        else if (elem.type === 'AND') newVals = [elem.inputs[0].val && elem.inputs[1].val];
+        else if (elem.type === 'OR') newVals = [elem.inputs[0].val || elem.inputs[1].val];
+        else if (elem.type === 'NOT') newVals = [!elem.inputs[0].val];
+        else if (elem.type === 'XOR') newVals = [elem.inputs[0].val !== elem.inputs[1].val];
+        else if (elem.type === 'SPLIT') { const v = elem.inputs[0].val; newVals = [v, v]; }
+        else if (elem.type === 'TIMER') { newVals = elem.outputs.map(() => elem.timer.outputValue); }
+        else if (elem.type === 'LAMP' || elem.type === 'SOUND') newVals = [];
+        else if (elem.type === 'DFF') { const clk = elem.inputs[0].val, d = elem.inputs[1].val; if (clk && !elem.ff.lastClk) elem.ff.q = d; elem.ff.lastClk = clk; newVals = [elem.ff.q, !elem.ff.q]; }
+        else if (elem.type === 'JKFF') { const clk = elem.inputs[0].val, j = elem.inputs[1].val, k = elem.inputs[2].val; if (clk && !elem.ff.lastClk) { if (j && !k) elem.ff.q = true; else if (!j && k) elem.ff.q = false; else if (j && k) elem.ff.q = !elem.ff.q; } elem.ff.lastClk = clk; newVals = [elem.ff.q, !elem.ff.q]; }
+        else if (elem.type === 'TFF') { const clk = elem.inputs[0].val, t = elem.inputs[1].val; if (clk && !elem.ff.lastClk) { if (t) elem.ff.q = !elem.ff.q; } elem.ff.lastClk = clk; newVals = [elem.ff.q, !elem.ff.q]; }
+        else if (elem.type === 'MUX') { const s0 = elem.inputs[4].val, s1 = elem.inputs[5].val; const sel = (s1 ? 2 : 0) + (s0 ? 1 : 0); newVals = [elem.inputs[sel].val]; }
+        else if (elem.type === 'DEMUX') { const d = elem.inputs[0].val, s0 = elem.inputs[1].val, s1 = elem.inputs[2].val; const sel = (s1 ? 2 : 0) + (s0 ? 1 : 0); newVals = [false, false, false, false]; newVals[sel] = d; }
+        newVals.forEach((v, i) => { if (elem.outputs[i] && elem.outputs[i].val !== v) { elem.outputs[i].val = v; changed = true; } });
+      });
+      if (!changed) break;
+    }
+  }
+
+  function processTimers() {
+    const now = performance.now(); let needRedraw = false;
+    elements.forEach(elem => {
+      if (elem.type !== 'TIMER') return;
+      const inputVal = elem.inputs[0].val; const h = elem.timer.history;
+      if (h.length === 0 || h[h.length - 1].val !== inputVal) h.push({ t: now, val: inputVal });
+      const maxAge = elem.timer.delay + 5000;
+      while (h.length > 1 && now - h[0].t > maxAge) { if (h.length > 2 && now - h[1].t > maxAge) h.shift(); else break; }
+      const targetTime = now - elem.timer.delay; let pastVal = false;
+      for (let i = h.length - 1; i >= 0; i--) { if (h[i].t <= targetTime) { pastVal = h[i].val; break; } }
+      if (h.length > 0 && h[0].t > targetTime) pastVal = false;
+      if (elem.timer.outputValue !== pastVal) { elem.timer.outputValue = pastVal; needRedraw = true; }
+    });
+    if (needRedraw) { computeLogic(); draw(); }
+  }
+
+  function processSoundElements() {
+    const now = performance.now(); let needRedraw = false;
+    elements.forEach(elem => {
+      if (elem.type !== 'SOUND') return;
+      const inputVal = elem.inputs[0].val;
+      if (inputVal && !elem.sound.lastInput) {
+        if (activeSounds.has(elem.id)) { if (!elem.sound.always) { stopSound(elem.id); startSound(elem); needRedraw = true; } }
+        else { startSound(elem); needRedraw = true; }
+      }
+      if (!inputVal && elem.sound.lastInput) { if (elem.sound.always) { stopSound(elem.id); needRedraw = true; } }
+      elem.sound.lastInput = inputVal;
+    });
+    activeSounds.forEach((entry, id) => { if (entry.stopAt !== null && now >= entry.stopAt) { stopSound(id); needRedraw = true; } });
+    if (needRedraw) { computeLogic(); draw(); }
+  }
+
+  function getPos(e) { const r = canvas.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; }
+
+  function findElem(p) {
+    const wp = freeFieldEnabled ? screenToWorld(p.x, p.y) : p;
+    for (let i = elements.length - 1; i >= 0; i--) {
+      const e = elements[i];
+      if (wp.x >= e.x && wp.x <= e.x + ELEM_W && wp.y >= e.y && wp.y <= e.y + ELEM_H) return e;
+    }
+    return null;
+  }
+
+  function findPort(p) {
+    const wp = freeFieldEnabled ? screenToWorld(p.x, p.y) : p;
+    const pr = PORT_R + 5;
+    for (let i = elements.length - 1; i >= 0; i--) {
+      const e = elements[i];
+      for (let idx = 0; idx < e.outputs.length; idx++) { const op = outPos(e, idx); if (Math.hypot(wp.x - op.x, wp.y - op.y) <= pr) return { id: e.id, type: 'out', idx, x: op.x, y: op.y }; }
+      for (let idx = 0; idx < e.inputs.length; idx++) { const ip = inPos(e, idx); if (Math.hypot(wp.x - ip.x, wp.y - ip.y) <= pr) return { id: e.id, type: 'in', idx, x: ip.x, y: ip.y }; }
+    }
+    return null;
+  }
+
+  function findGear(p) {
+    const wp = freeFieldEnabled ? screenToWorld(p.x, p.y) : p;
+    for (let i = elements.length - 1; i >= 0; i--) {
+      const e = elements[i];
+      if (e.type !== 'TIMER' && e.type !== 'SOUND') continue;
+      const gp = gearPos(e);
+      if (Math.hypot(wp.x - gp.x, wp.y - gp.y) <= GEAR_SIZE/2 + 2) return e;
+    }
+    return null;
+  }
+
+  function findWire(p) {
+    const wp = freeFieldEnabled ? screenToWorld(p.x, p.y) : p;
+    for (let i = wires.length - 1; i >= 0; i--) {
+      const w = wires[i];
+      const from = elements.find(e => e.id === w.fromId);
+      const to = elements.find(e => e.id === w.toId);
+      if (!from || !to) continue;
+      const p1 = outPos(from, w.fromPort || 0), p2 = inPos(to, w.toPort);
+      const cp1x = p1.x + 50, cp2x = p2.x - 50;
+      let minD = Infinity;
+      for (let t = 0; t <= 1; t += 0.05) {
+        const mt = 1 - t;
+        const bx = mt*mt*mt*p1.x + 3*mt*mt*t*cp1x + 3*mt*t*t*cp2x + t*t*t*p2.x;
+        const by = mt*mt*mt*p1.y + 3*mt*mt*t*p1.y + 3*mt*t*t*p2.y + t*t*t*p2.y;
+        const d = Math.hypot(wp.x - bx, wp.y - by);
+        if (d < minD) minD = d;
+      }
+      if (minD < 8 / (freeFieldEnabled ? view.zoom : 1)) return w;
+    }
+    return null;
+  }
+
+  function rectsIntersect(a, b) { return !(a.x + a.w < b.x || b.x + b.w < a.x || a.y + a.h < b.y || b.y + b.h < a.y); }
+
+  let autoSaveTimer = null;
+  function scheduleAutoSave() {
+    if (autoSaveTimer) clearTimeout(autoSaveTimer);
+    autoSaveTimer = setTimeout(() => { try { localStorage.setItem(AUTOSAVE_KEY, JSON.stringify(serializeCurrent())); } catch (e) {} }, 500);
+  }
+
+  function tryRestoreAutoSave() {
+    try { const raw = localStorage.getItem(AUTOSAVE_KEY); if (!raw) return false; const data = JSON.parse(raw); if (!data.elements || data.elements.length === 0) return false; loadScheme(data); return true; } catch (e) { return false; }
+  }
+
+  // КОНТЕКСТНЫЕ МЕНЮ
+  const elementContextMenu = document.getElementById('elementContextMenu');
+  const fieldContextMenu = document.getElementById('fieldContextMenu');
+  const elementMenuHeader = document.getElementById('elementMenuHeader');
+  const elementMenuType = document.getElementById('elementMenuType');
+  const elementMenuActivate = document.getElementById('elementMenuActivate');
+  const fieldMenuPaste = document.getElementById('fieldMenuPaste');
+  const fieldMenuZoom = document.getElementById('fieldMenuZoom');
+
+  const TYPE_NAMES = { AND: 'И (AND)', OR: 'ИЛИ (OR)', NOT: 'НЕ (NOT)', XOR: 'КСОР (XOR)', SPLIT: 'Разветвитель', TIMER: 'Таймер', SWITCH: 'Рычаг', BUTTON: 'Кнопка', LAMP: 'Лампочка', SOUND: 'Звук', DFF: 'D-триггер', JKFF: 'JK-триггер', TFF: 'T-триггер', MUX: 'Мультиплексор', DEMUX: 'Демультиплексор' };
+  const TYPE_ICONS = { AND: '🟢', OR: '🔵', NOT: '🟠', XOR: '🔴', SPLIT: '🟣', TIMER: '⏱', SWITCH: '🎚', BUTTON: '🔘', LAMP: '💡', SOUND: '🔊', DFF: 'D', JKFF: 'JK', TFF: 'T', MUX: '🔀', DEMUX: '↔️' };
+
+  let contextMenuElem = null;
+
+  function showElementMenu(x, y, elem) {
+    hideAllContextMenus();
+    contextMenuElem = elem;
+    elementMenuType.textContent = TYPE_NAMES[elem.type] || elem.type;
+    elementMenuHeader.querySelector('.cm-header-icon').textContent = TYPE_ICONS[elem.type] || '🔷';
+    if (elem.type === 'SWITCH' || elem.type === 'BUTTON') {
+      elementMenuActivate.style.display = 'flex';
+      if (elem.type === 'SWITCH') elementMenuActivate.querySelector('.cm-label').textContent = elem.state ? 'Выключить' : 'Включить';
+      else elementMenuActivate.querySelector('.cm-label').textContent = 'Нажать';
+    } else elementMenuActivate.style.display = 'none';
+    elementContextMenu.classList.add('active');
+    positionMenu(elementContextMenu, x, y);
+  }
+
+  function showFieldMenu(x, y) {
+    hideAllContextMenus();
+    contextMenuElem = null;
+    if (clipboard && clipboard.elements && clipboard.elements.length > 0) {
+      fieldMenuPaste.disabled = false; fieldMenuPaste.style.opacity = '1'; fieldMenuPaste.style.pointerEvents = 'auto';
+    } else {
+      fieldMenuPaste.disabled = true; fieldMenuPaste.style.opacity = '.4'; fieldMenuPaste.style.pointerEvents = 'none';
+    }
+    const zoomLabel = fieldMenuZoom.querySelector('.cm-label');
+    const zoomIcon = fieldMenuZoom.querySelector('.cm-icon');
+    if (freeFieldEnabled) { zoomLabel.textContent = 'Выключить масштабирование'; zoomIcon.textContent = '🚫'; fieldMenuZoom.classList.remove('accent'); }
+    else { zoomLabel.textContent = 'Включить масштабирование'; zoomIcon.textContent = '🗺'; fieldMenuZoom.classList.add('accent'); }
+    fieldContextMenu.classList.add('active');
+    positionMenu(fieldContextMenu, x, y);
+  }
+
+  function positionMenu(menu, x, y) {
+    menu.style.left = '0px'; menu.style.top = '0px';
+    const rect = menu.getBoundingClientRect();
+    const vw = window.innerWidth, vh = window.innerHeight;
+    let left = x, top = y;
+    if (left + rect.width > vw - 10) left = vw - rect.width - 10;
+    if (top + rect.height > vh - 10) top = vh - rect.height - 10;
+    if (left < 10) left = 10;
+    if (top < 10) top = 10;
+    menu.style.left = left + 'px'; menu.style.top = top + 'px';
+  }
+
+  function hideAllContextMenus() {
+    elementContextMenu.classList.remove('active');
+    fieldContextMenu.classList.remove('active');
+  }
+
+  elementContextMenu.querySelectorAll('.context-menu-item').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const action = btn.dataset.action;
+      const elem = contextMenuElem;
+      hideAllContextMenus();
+      if (!elem) return;
+      if (action === 'help') openInfo(elem.type);
+      else if (action === 'copy') { selectedIds.clear(); selectedIds.add(elem.id); copySelection(); }
+      else if (action === 'activate') {
+        if (elem.type === 'SWITCH') { pushHistory(); elem.state = !elem.state; computeLogic(); scheduleAutoSave(); draw(); }
+        else if (elem.type === 'BUTTON') { pushHistory(); pressedButton = elem; computeLogic(); draw(); setTimeout(() => { if (pressedButton === elem) { pressedButton = null; computeLogic(); draw(); } }, 200); }
+      } else if (action === 'delete') {
+        pushHistory();
+        wires = wires.filter(x => x.fromId !== elem.id && x.toId !== elem.id);
+        if (elem.type === 'SOUND') stopSound(elem.id);
+        elements = elements.filter(x => x !== elem);
+        selectedIds.delete(elem.id);
+        computeLogic(); scheduleAutoSave(); draw();
+      }
+    });
+  });
+
+  fieldContextMenu.querySelectorAll('.context-menu-item').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const action = btn.dataset.action;
+      hideAllContextMenus();
+      if (action === 'paste') pasteClipboard();
+      else if (action === 'clearAll') {
+        if (elements.length === 0) { showToast('Поле уже пустое'); return; }
+        if (confirm(`Удалить все элементы (${elements.length})?`)) {
+          pushHistory(); stopAllSounds();
+          elements = []; wires = []; nextId = 1;
+          wireFrom = null; pressedButton = null; selectedIds.clear();
+          computeLogic(); scheduleAutoSave(); draw();
+          showToast('🗑 Поле очищено');
+        }
+      } else if (action === 'toggleZoom') setFreeField(!freeFieldEnabled);
+    });
+  });
+
+  document.addEventListener('mousedown', e => {
+    if (!elementContextMenu.contains(e.target) && !fieldContextMenu.contains(e.target)) hideAllContextMenus();
+  });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') hideAllContextMenus(); });
+
+  // МЫШЬ
+  canvas.addEventListener('mousedown', e => {
+    if (e.button === 2) {
+      const p = getPos(e);
+      rmbIsDown = true; rmbDownPos = { x: e.clientX, y: e.clientY }; panMoved = false;
+      const wireHit = findWire(p);
+      if (wireHit) { rmbTarget = { type: 'wire', wire: wireHit }; e.preventDefault(); return; }
+      const elemHit = findElem(p);
+      if (elemHit) { rmbTarget = { type: 'elem', elem: elemHit }; e.preventDefault(); return; }
+      rmbTarget = { type: 'field' };
+      if (freeFieldEnabled) {
+        isPanning = true;
+        panStart = { x: e.clientX, y: e.clientY, vx: viewTarget.x, vy: viewTarget.y };
+        document.body.classList.add('panning');
+        e.preventDefault(); return;
+      }
+      e.preventDefault(); return;
+    }
+
+    if (e.button !== 0) return;
+    const p = getPos(e);
+
+    const gearElem = findGear(p);
+    if (gearElem) {
+      if (gearElem.type === 'TIMER') openTimerSettings(gearElem.id);
+      else if (gearElem.type === 'SOUND') openSoundSettings(gearElem.id);
+      return;
+    }
+
+    const port = findPort(p);
+    const elem = findElem(p);
+
+    if (port && port.type === 'out') {
+      wireFrom = { id: port.id, portIndex: port.idx, x: port.x, y: port.y };
+      modeDisplay.textContent = 'Тяните провод ко входу';
+      draw();
+      return;
+    }
+
+    if (elem) {
+      if (!selectedIds.has(elem.id)) { selectedIds.clear(); selectedIds.add(elem.id); }
+      if (elem.type === 'SWITCH') {
+        pushHistory(); elem.state = !elem.state; computeLogic(); scheduleAutoSave(); draw(); return;
+      }
+      if (elem.type === 'BUTTON') {
+        pressedButton = elem; computeLogic(); draw(); modeDisplay.textContent = 'Кнопка нажата'; return;
+      }
+
+      draggingElem = elem;
+      const wp = freeFieldEnabled ? screenToWorld(p.x, p.y) : p;
+      dragOffX = wp.x - elem.x;
+      dragOffY = wp.y - elem.y;
+
+      // Для группы — запоминаем offset каждого элемента
+      dragGroupOffsets = null;
+      if (selectedIds.has(elem.id) && selectedIds.size > 1) {
+        dragGroupOffsets = new Map();
+        selectedIds.forEach(id => {
+          const el = elements.find(x => x.id === id);
+          if (el) dragGroupOffsets.set(id, { x: wp.x - el.x, y: wp.y - el.y });
+        });
+      }
+
+      wireFrom = null;
+      dragStartPos = { pushed: false };
+      modeDisplay.textContent = 'Перетаскивание';
+      return;
+    }
+
+    if (!wireFrom) {
+      isSelecting = true;
+      const wp = freeFieldEnabled ? screenToWorld(p.x, p.y) : p;
+      dragStartPos = { x: wp.x, y: wp.y };
+      selectionRect = { x1: wp.x, y1: wp.y, x2: wp.x, y2: wp.y };
+      if (!e.shiftKey) selectedIds.clear();
+      modeDisplay.textContent = 'Выделение';
+    }
+    wireFrom = null;
+    draw();
+  });
+
+  canvas.addEventListener('mousemove', e => {
+    if (rmbIsDown && rmbDownPos) {
+      const dx = e.clientX - rmbDownPos.x, dy = e.clientY - rmbDownPos.y;
+      if (Math.hypot(dx, dy) > 4) panMoved = true;
+    }
+    if (isPanning) {
+      viewTarget.x = panStart.vx + (e.clientX - panStart.x);
+      viewTarget.y = panStart.vy + (e.clientY - panStart.y);
+      return;
+    }
+
+    const p = getPos(e);
+    const wp = freeFieldEnabled ? screenToWorld(p.x, p.y) : p;
+    mouse.x = wp.x; mouse.y = wp.y; mouse.inside = true;
+    hoverPort = findPort(p);
+
+    const prevGear = hoverTimerGear, prevSGear = hoverSoundGear;
+    const gearElem = findGear(p);
+    hoverTimerGear = (gearElem && gearElem.type === 'TIMER') ? gearElem.id : null;
+    hoverSoundGear = (gearElem && gearElem.type === 'SOUND') ? gearElem.id : null;
+
+    if (draggingElem) {
+      // Мгновенное перетаскивание (без lerp)
+      if (dragStartPos && !dragStartPos.pushed) { pushHistory(); dragStartPos.pushed = true; }
+      if (dragGroupOffsets && selectedIds.has(draggingElem.id) && selectedIds.size > 1) {
+        dragGroupOffsets.forEach((offset, id) => {
+          const el = elements.find(x => x.id === id);
+          if (el) { el.x = wp.x - offset.x; el.y = wp.y - offset.y; }
+        });
+      } else {
+        draggingElem.x = wp.x - dragOffX;
+        draggingElem.y = wp.y - dragOffY;
+      }
+      computeLogic();
+      draw();
+      return;
+    }
+
+    if (isSelecting) {
+      selectionRect.x2 = wp.x; selectionRect.y2 = wp.y;
+      const r = { x: Math.min(selectionRect.x1, selectionRect.x2), y: Math.min(selectionRect.y1, selectionRect.y2), w: Math.abs(selectionRect.x2 - selectionRect.x1), h: Math.abs(selectionRect.y2 - selectionRect.y1) };
+      if (!e.shiftKey) selectedIds.clear();
+      elements.forEach(el => { const box = { x: el.x, y: el.y, w: ELEM_W, h: ELEM_H }; if (rectsIntersect(box, r)) selectedIds.add(el.id); });
+      draw(); return;
+    }
+
+    if (hoverTimerGear !== prevGear || hoverSoundGear !== prevSGear) {
+      canvas.style.cursor = (hoverTimerGear || hoverSoundGear) ? 'pointer' : (freeFieldEnabled ? 'grab' : 'default');
+    }
+    draw();
+  });
+
+  canvas.addEventListener('mouseup', e => {
+    if (e.button === 2) {
+      if (isPanning) {
+        isPanning = false;
+        document.body.classList.remove('panning');
+        saveView();
+        rmbIsDown = false; rmbDownPos = null; rmbTarget = null;
+        return;
+      }
+      if (!panMoved && rmbTarget) {
+        if (rmbTarget.type === 'wire') {
+          pushHistory(); wires = wires.filter(x => x !== rmbTarget.wire); computeLogic(); scheduleAutoSave(); draw();
+        } else if (rmbTarget.type === 'elem') showElementMenu(e.clientX, e.clientY, rmbTarget.elem);
+        else if (rmbTarget.type === 'field') showFieldMenu(e.clientX, e.clientY);
+      }
+      rmbIsDown = false; rmbDownPos = null; rmbTarget = null;
+      return;
+    }
+
+    if (e.button !== 0) return;
+
+    if (wireFrom) {
+      const p = getPos(e);
+      const port = findPort(p);
+      if (port && port.type === 'in' && port.id !== wireFrom.id) {
+        const exists = wires.some(w => w.fromId === wireFrom.id && w.fromPort === wireFrom.portIndex && w.toId === port.id && w.toPort === port.idx);
+        if (!exists) {
+          pushHistory();
+          wires.push({ fromId: wireFrom.id, fromPort: wireFrom.portIndex, toId: port.id, toPort: port.idx });
+          computeLogic(); scheduleAutoSave();
+        }
+      }
+      wireFrom = null;
+      modeDisplay.textContent = 'Выбор';
+      draw();
+      return;
+    }
+
+    if (draggingElem) {
+      draggingElem = null;
+      dragGroupOffsets = null;
+      dragStartPos = null;
+      modeDisplay.textContent = 'Выбор';
+      computeLogic();
+      scheduleAutoSave();
+      draw();
+      return;
+    }
+
+    if (isSelecting) {
+      isSelecting = false;
+      selectionRect = null;
+      modeDisplay.textContent = selectedIds.size > 0 ? `Выделено: ${selectedIds.size}` : 'Выбор';
+      draw();
+      return;
+    }
+
+    if (pressedButton) {
+      pressedButton = null;
+      computeLogic();
+      draw();
+      modeDisplay.textContent = 'Выбор';
+    }
+  });
+
+  canvas.addEventListener('mouseleave', () => {
+    if (isPanning) { isPanning = false; document.body.classList.remove('panning'); saveView(); }
+    rmbIsDown = false; rmbDownPos = null; rmbTarget = null;
+    mouse.inside = false; hoverPort = null; hoverTimerGear = null; hoverSoundGear = null;
+    canvas.style.cursor = freeFieldEnabled ? 'grab' : 'default';
+    if (pressedButton) { pressedButton = null; computeLogic(); }
+    if (wireFrom && !draggingElem) { wireFrom = null; modeDisplay.textContent = 'Выбор'; }
+    if (isSelecting) { isSelecting = false; selectionRect = null; }
+    draw();
+  });
+
+  canvas.addEventListener('contextmenu', e => e.preventDefault());
+
+  canvas.addEventListener('wheel', e => {
+    if (!freeFieldEnabled) return;
+    e.preventDefault();
+    const p = getPos(e);
+    const wp = screenToWorld(p.x, p.y);
+    const factor = e.deltaY < 0 ? 1.15 : 1/1.15;
+    const newZoom = Math.max(0.1, Math.min(5, viewTarget.zoom * factor));
+    viewTarget.zoom = newZoom;
+    viewTarget.x = p.x - wp.x * newZoom;
+    viewTarget.y = p.y - wp.y * newZoom;
+  }, { passive: false });
+
+  document.addEventListener('keydown', e => {
+    const inInput = document.activeElement && document.activeElement.tagName === 'INPUT';
+
+    if ((e.key === 'Delete' || e.key === 'Backspace') && !inInput) {
+      if (selectedIds.size > 0) {
+        e.preventDefault();
+        pushHistory();
+        selectedIds.forEach(id => { const el = elements.find(x => x.id === id); if (el && el.type === 'SOUND') stopSound(el.id); });
+        wires = wires.filter(w => !selectedIds.has(w.fromId) && !selectedIds.has(w.toId));
+        elements = elements.filter(el => !selectedIds.has(el.id));
+        selectedIds.clear();
+        computeLogic(); scheduleAutoSave(); draw();
+      }
+      return;
+    }
+
+    if (e.key === 'Escape') {
+      if (elementContextMenu.classList.contains('active') || fieldContextMenu.classList.contains('active')) { hideAllContextMenus(); return; }
+      if (selectedIds.size > 0) { selectedIds.clear(); draw(); return; }
+    }
+
+    if ((e.ctrlKey || e.metaKey) && e.key === 'a' && !inInput) { e.preventDefault(); elements.forEach(el => selectedIds.add(el.id)); draw(); modeDisplay.textContent = `Выделено: ${selectedIds.size}`; return; }
+    if ((e.ctrlKey || e.metaKey) && e.key === 'c' && !inInput) { if (selectedIds.size > 0) { e.preventDefault(); copySelection(); } return; }
+    if ((e.ctrlKey || e.metaKey) && e.key === 'v' && !inInput) { e.preventDefault(); pasteClipboard(); return; }
+    if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key === 'z' && !inInput) { e.preventDefault(); undo(); return; }
+    if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.shiftKey && e.key === 'z'))) { if (!inInput) { e.preventDefault(); redo(); } return; }
+    if ((e.ctrlKey || e.metaKey) && e.key === '0' && freeFieldEnabled && !inInput) { e.preventDefault(); resetView(); return; }
+  });
+
+  function copySelection() {
+    if (selectedIds.size === 0) return;
+    const elems = elements.filter(e => selectedIds.has(e.id));
+    if (elems.length === 0) return;
+    const copiedElems = elems.map(e => ({
+      type: e.type, x: e.x, y: e.y, state: e.state,
+      inputs: e.inputs.map(i => ({ dx: i.dx, dy: i.dy, label: i.label })),
+      outputs: e.outputs.map(o => ({ dx: o.dx, dy: o.dy, label: o.label })),
+      timer: e.timer ? { outCount: e.timer.outCount, delay: e.timer.delay, delayValue: e.timer.delayValue, delayUnit: e.timer.delayUnit } : undefined,
+      sound: e.sound ? { freq: e.sound.freq, wave: e.sound.wave, duration: e.sound.duration, durationValue: e.sound.durationValue, durationUnit: e.sound.durationUnit, always: e.sound.always } : undefined,
+      ff: e.ff ? { q: e.ff.q } : undefined,
+      _origId: e.id
+    }));
+    const copiedWires = wires.filter(w => selectedIds.has(w.fromId) && selectedIds.has(w.toId)).map(w => ({ fromOrigId: w.fromId, fromPort: w.fromPort, toOrigId: w.toId, toPort: w.toPort }));
+    clipboard = { elements: copiedElems, wires: copiedWires };
+    showToast(`📋 Скопировано: ${copiedElems.length} эл.`);
+  }
+
+  function pasteClipboard() {
+    if (!clipboard || clipboard.elements.length === 0) { showToast('📋 Буфер обмена пуст'); return; }
+    pushHistory();
+    const offset = 30;
+    const idMap = new Map(); const newIds = [];
+    clipboard.elements.forEach(ce => {
+      const newElem = createElem(ce.type, ce.x + offset, ce.y + offset, { timer: ce.timer, sound: ce.sound });
+      newElem.state = ce.state;
+      if (ce.ff && newElem.ff) newElem.ff.q = ce.ff.q;
+      idMap.set(ce._origId, newElem.id); newIds.push(newElem.id);
+    });
+    clipboard.wires.forEach(cw => {
+      const newFromId = idMap.get(cw.fromOrigId);
+      const newToId = idMap.get(cw.toOrigId);
+      if (newFromId && newToId) wires.push({ fromId: newFromId, fromPort: cw.fromPort, toId: newToId, toPort: cw.toPort });
+    });
+    selectedIds.clear(); newIds.forEach(id => selectedIds.add(id));
+    computeLogic(); scheduleAutoSave(); draw();
+    showToast(`✨ Вставлено: ${newIds.length} эл.`);
+  }
+
+  document.querySelectorAll('.palette-item').forEach(item => {
+    item.addEventListener('dragstart', e => {
+      if (e.target.classList.contains('info-btn')) { e.preventDefault(); return; }
+      e.dataTransfer.setData('text/plain', item.dataset.type);
+    });
+  });
+
+  container.addEventListener('dragover', e => e.preventDefault());
+  container.addEventListener('drop', e => {
+    e.preventDefault();
+    const type = e.dataTransfer.getData('text/plain');
+    if (!type) return;
+    const p = getPos(e);
+    const wp = freeFieldEnabled ? screenToWorld(p.x, p.y) : p;
+    pushHistory();
+    createElem(type, wp.x - ELEM_W/2, wp.y - ELEM_H/2);
+    computeLogic(); scheduleAutoSave(); draw();
+  });
+
+  function getSavedSchemes() { try { const raw = localStorage.getItem(STORAGE_KEY); return raw ? JSON.parse(raw) : {}; } catch (e) { return {}; } }
+  function setSavedSchemes(obj) { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(obj)); } catch (e) { alert('Не удалось сохранить: ' + e.message); } }
+
+  function serializeCurrent() {
+    return {
+      elements: elements.map(e => ({
+        id: e.id, type: e.type, x: e.x, y: e.y, state: e.state,
+        inputs: e.inputs.map(i => ({ dx: i.dx, dy: i.dy, label: i.label })),
+        outputs: e.outputs.map(o => ({ dx: o.dx, dy: o.dy, label: o.label })),
+        timer: e.timer ? { outCount: e.timer.outCount, delay: e.timer.delay, delayValue: e.timer.delayValue, delayUnit: e.timer.delayUnit } : undefined,
+        sound: e.sound ? { freq: e.sound.freq, wave: e.sound.wave, duration: e.sound.duration, durationValue: e.sound.durationValue, durationUnit: e.sound.durationUnit, always: e.sound.always } : undefined,
+        ff: e.ff ? { q: e.ff.q } : undefined
+      })),
+      wires: wires.map(w => ({ fromId: w.fromId, fromPort: w.fromPort, toId: w.toId, toPort: w.toPort })),
+      nextId, savedAt: Date.now()
+    };
+  }
+
+  function loadScheme(data) {
+    stopAllSounds();
+    elements = data.elements.map(e => {
+      const elem = { id: e.id, type: e.type, x: e.x, y: e.y, state: e.state || false,
+        inputs: e.inputs.map(i => ({ dx: i.dx, dy: i.dy, val: false, label: i.label })),
+        outputs: (e.outputs || []).map(o => ({ dx: o.dx, dy: o.dy, val: false, label: o.label })) };
+      if (e.type === 'TIMER') { elem.timer = { outCount: e.timer?.outCount || 1, delay: e.timer?.delay || 1000, delayValue: e.timer?.delayValue || 1, delayUnit: e.timer?.delayUnit || 's', history: [], outputValue: false, lastInput: false, lastInputTime: 0 }; rebuildTimerRuntime(elem); }
+      else if (e.type === 'SOUND') { elem.sound = { freq: e.sound?.freq || 440, wave: e.sound?.wave || 'sine', duration: e.sound?.duration || 1000, durationValue: e.sound?.durationValue || 1, durationUnit: e.sound?.durationUnit || 's', always: e.sound?.always || false, lastInput: false, playing: false, stopAt: null }; }
+      else if (e.type === 'DFF' || e.type === 'JKFF' || e.type === 'TFF') { elem.ff = { q: e.ff?.q || false, lastClk: false }; }
+      return elem;
+    });
+    wires = (data.wires || []).map(w => ({ fromId: w.fromId, fromPort: w.fromPort || 0, toId: w.toId, toPort: w.toPort }));
+    nextId = data.nextId || (elements.reduce((m, e) => Math.max(m, e.id), 0) + 1);
+    computeLogic(); draw();
+  }
+
+  const modal = document.getElementById('saveModal');
+  const schemeNameInput = document.getElementById('schemeName');
+  const savedListEl = document.getElementById('savedList');
+  const savedCountEl = document.getElementById('savedCount');
+  const modalSaveBtn = document.getElementById('modalSaveBtn');
+
+  function openModal() {
+    modal.classList.add('active');
+    if (!schemeNameInput.value) schemeNameInput.value = 'Схема ' + new Date().toLocaleString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+    renderSavedList();
+    setTimeout(() => { schemeNameInput.focus(); schemeNameInput.select(); }, 50);
+  }
+  function closeModal() { modal.classList.remove('active'); }
+
+  function renderSavedList() {
+    const schemes = getSavedSchemes();
+    const keys = Object.keys(schemes).sort((a, b) => (schemes[b].savedAt || 0) - (schemes[a].savedAt || 0));
+    savedCountEl.textContent = keys.length;
+    if (keys.length === 0) { savedListEl.innerHTML = '<div class="saved-empty">Пока ничего не сохранено</div>'; return; }
+    savedListEl.innerHTML = '';
+    keys.forEach(name => {
+      const s = schemes[name];
+      const item = document.createElement('div');
+      item.className = 'saved-item';
+      const date = s.savedAt ? new Date(s.savedAt).toLocaleString('ru-RU') : '';
+      item.innerHTML = `<div class="info"><div class="name">${escapeHtml(name)}</div><div class="meta">${date} · ${s.elements?.length||0} эл. · ${s.wires?.length||0} пров.</div></div><div class="actions"><button data-action="load" data-name="${escapeAttr(name)}">Загрузить</button><button data-action="del" data-name="${escapeAttr(name)}" class="del">Удалить</button></div>`;
+      savedListEl.appendChild(item);
+    });
+    savedListEl.querySelectorAll('button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const name = btn.dataset.name; const schemes = getSavedSchemes();
+        if (btn.dataset.action === 'load') {
+          if (schemes[name] && confirm(`Загрузить "${name}"?`)) { pushHistory(); loadScheme(schemes[name]); scheduleAutoSave(); closeModal(); }
+        } else {
+          if (confirm(`Удалить "${name}"?`)) { delete schemes[name]; setSavedSchemes(schemes); renderSavedList(); }
+        }
+      });
+    });
+  }
+
+  function escapeHtml(s) { return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+  function escapeAttr(s) { return escapeHtml(s); }
+
+  function saveCurrentScheme() {
+    const name = schemeNameInput.value.trim();
+    if (!name) { schemeNameInput.focus(); schemeNameInput.style.borderColor = '#ff6666'; setTimeout(() => schemeNameInput.style.borderColor = '', 800); return; }
+    const schemes = getSavedSchemes();
+    if (schemes[name] && !confirm(`"${name}" уже существует. Перезаписать?`)) return;
+    schemes[name] = serializeCurrent();
+    setSavedSchemes(schemes); renderSavedList();
+    modalSaveBtn.textContent = '✓ Сохранено';
+    setTimeout(() => modalSaveBtn.textContent = 'Сохранить', 900);
+  }
+
+  document.getElementById('saveBtn').onclick = openModal;
+  document.getElementById('modalCloseBtn').onclick = closeModal;
+  document.getElementById('modalCancelBtn').onclick = closeModal;
+  modalSaveBtn.onclick = saveCurrentScheme;
+  schemeNameInput.addEventListener('keydown', e => { if (e.key === 'Enter') saveCurrentScheme(); });
+  modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
+  document.getElementById('loadBtn').onclick = openModal;
+
+  document.getElementById('clearBtn').onclick = () => {
+    if (confirm('Очистить холст?')) {
+      pushHistory(); stopAllSounds();
+      elements = []; wires = []; nextId = 1;
+      wireFrom = null; pressedButton = null; selectedIds.clear();
+      computeLogic(); scheduleAutoSave(); draw();
+    }
+  };
+
+  document.getElementById('undoBtn').onclick = undo;
+  document.getElementById('redoBtn').onclick = redo;
+
+  const palette = document.getElementById('palette');
+  const panelToggleBtn = document.getElementById('panelToggleBtn');
+
+  function setPanelState(state) {
+    palette.classList.remove('column', 'expanded'); palette.classList.add(state);
+    panelToggleBtn.classList.toggle('active', state === 'expanded');
+    localStorage.setItem(PANEL_KEY, state);
+    setTimeout(resizeCanvas, 320);
+  }
+
+  panelToggleBtn.onclick = () => {
+    if (palette.classList.contains('column')) { setPanelState('expanded'); showToast('📚 Все элементы крупным планом'); }
+    else setPanelState('column');
+  };
+
+  const savedPanelState = localStorage.getItem(PANEL_KEY);
+  if (savedPanelState === 'expanded') { palette.classList.remove('column'); palette.classList.add('expanded'); panelToggleBtn.classList.add('active'); }
+
+  // НАСТРОЙКИ
+  const settingsModal = document.getElementById('settingsModal');
+  const settingsSidebar = document.getElementById('settingsSidebar');
+  const statusHint = document.getElementById('statusHint');
+
+  function openSettings() { settingsModal.classList.add('active'); updateViewInfoText(); updateFreeFieldSwitch(); }
+  function closeSettings() { settingsModal.classList.remove('active'); }
+
+  document.getElementById('settingsBtn').onclick = openSettings;
+  document.getElementById('settingsCloseBtn').onclick = closeSettings;
+  document.getElementById('settingsOkBtn').onclick = closeSettings;
+  settingsModal.addEventListener('click', e => { if (e.target === settingsModal) closeSettings(); });
+
+  settingsSidebar.querySelectorAll('.settings-nav-item').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const panel = btn.dataset.panel;
+      settingsSidebar.querySelectorAll('.settings-nav-item').forEach(b => b.classList.toggle('active', b.dataset.panel === panel));
+      document.querySelectorAll('.settings-panel').forEach(p => p.classList.toggle('active', p.dataset.panel === panel));
+      if (panel === 'zoom') updateViewInfoText();
+    });
+  });
+
+  document.querySelectorAll('.settings-size-option').forEach(opt => {
+    opt.addEventListener('click', () => { applySize(opt.dataset.size); showToast('Размер изменён'); });
+  });
+
+  const freeFieldSwitch = document.getElementById('freeFieldSwitch');
+  const freeFieldToggleRow = document.getElementById('freeFieldToggleRow');
+
+  function updateFreeFieldSwitch() {
+    if (freeFieldEnabled) freeFieldSwitch.classList.add('on');
+    else freeFieldSwitch.classList.remove('on');
+  }
+
+  function updateFreeFieldUI() {
+    document.body.classList.toggle('free-field', freeFieldEnabled);
+    updateFreeFieldSwitch();
+    if (freeFieldEnabled) statusHint.textContent = '🗺 Свободное поле: колёсико — зум, ПКМ — панорамирование · Ctrl+0 — сброс';
+    else statusHint.textContent = 'ЛКМ — выбрать · ПКМ — контекстное меню · Ctrl+C/V · Ctrl+Z/Y · Del';
+  }
+
+  function setFreeField(enabled) {
+    freeFieldEnabled = enabled;
+    localStorage.setItem(FREE_FIELD_KEY, enabled ? '1' : '0');
+    if (enabled) {
+      viewTarget = { ...view };
+    } else {
+      viewTarget = { x: 0, y: 0, zoom: 1 };
+    }
+    updateFreeFieldUI(); updateZoomIndicator();
+    if (enabled) showToast('🗺 Свободное поле включено', 'free-field-toast');
+    else showToast('Свободное поле выключено');
+  }
+
+  function resetView() {
+    viewTarget = { x: 0, y: 0, zoom: 1 };
+    saveView();
+    showToast('⊙ Вид сброшен');
+  }
+
+  freeFieldToggleRow.addEventListener('click', () => setFreeField(!freeFieldEnabled));
+  document.getElementById('resetViewBtn').onclick = resetView;
+
+  if (localStorage.getItem(FREE_FIELD_KEY) === '1') {
+    freeFieldEnabled = true;
+  } else {
+    viewTarget = { x: 0, y: 0, zoom: 1 };
+  }
+  updateFreeFieldUI();
+  updateZoomIndicator();
+
+  // INFO
+  const INFO_DATA = {
+    AND: { title: 'И (AND)', formula: 'Q = A · B', description: 'Логическое умножение.', table: { headers: ['A','B','Q'], rows: [[0,0,0],[0,1,0],[1,0,0],[1,1,1]] } },
+    OR: { title: 'ИЛИ (OR)', formula: 'Q = A + B', description: 'Логическое сложение.', table: { headers: ['A','B','Q'], rows: [[0,0,0],[0,1,1],[1,0,1],[1,1,1]] } },
+    NOT: { title: 'НЕ (NOT)', formula: 'Q = ¬A', description: 'Инверсия.', table: { headers: ['A','Q'], rows: [[0,1],[1,0]] } },
+    XOR: { title: 'XOR', formula: 'Q = A ⊕ B', description: 'Различие входов.', table: { headers: ['A','B','Q'], rows: [[0,0,0],[0,1,1],[1,0,1],[1,1,0]] } },
+    SPLIT: { title: 'Разветвитель', description: 'Дублирует сигнал.', table: null },
+    TIMER: { title: 'Таймер', description: 'Задержка сигнала.', table: null },
+    SWITCH: { title: 'Рычаг', description: 'Клик — ON/OFF.', table: null },
+    BUTTON: { title: 'Кнопка', description: 'Удержание ЛКМ = 1.', table: null },
+    LAMP: { title: 'Лампочка', description: 'Индикатор 0/1.', table: null },
+    SOUND: { title: 'Звук', description: 'Издаёт звук при 1.', table: null },
+    DFF: { title: 'D-триггер', formula: 'Q ← D при CLK ↑', description: 'Защёлка по фронту CLK.', table: null },
+    JKFF: { title: 'JK-триггер', description: 'Универсальный триггер.', table: { headers: ['J','K','Q'], rows: [['0','0','Q'],['0','1','0'],['1','0','1'],['1','1','¬Q']] } },
+    TFF: { title: 'T-триггер', description: 'Делит частоту на 2.', table: null },
+    MUX: { title: 'Мультиплексор', description: '4→1 выбор.', table: null },
+    DEMUX: { title: 'Демультиплексор', description: '1→4 распределение.', table: null }
+  };
+
+  const infoModal = document.getElementById('infoModal');
+  const infoTitle = document.getElementById('infoTitle');
+  const infoContent = document.getElementById('infoContent');
+
+  function openInfo(type) {
+    const data = INFO_DATA[type];
+    if (!data) return;
+    infoTitle.textContent = data.title;
+    let html = '';
+    if (data.formula) html += `<div class="info-section"><h4>Формула</h4><div class="formula">${data.formula}</div></div>`;
+    html += `<div class="info-section"><h4>Описание</h4><p>${data.description}</p></div>`;
+    if (data.table) {
+      html += `<div class="info-section"><h4>Таблица истинности</h4><table><thead><tr>`;
+      data.table.headers.forEach(h => html += `<th>${h}</th>`);
+      html += `</tr></thead><tbody>`;
+      data.table.rows.forEach(row => { html += '<tr>'; row.forEach((val, i) => { const isLast = i === row.length - 1; const cls = isLast ? (val === 1 || val === '1' ? 'high' : 'low') : ''; html += `<td class="${cls}">${val}</td>`; }); html += '</tr>'; });
+      html += `</tbody></table></div>`;
+    }
+    infoContent.innerHTML = html;
+    infoModal.classList.add('active');
+  }
+  function closeInfo() { infoModal.classList.remove('active'); }
+
+  document.querySelectorAll('.info-btn').forEach(btn => {
+    btn.addEventListener('click', e => { e.stopPropagation(); e.preventDefault(); openInfo(btn.dataset.info); });
+    btn.addEventListener('mousedown', e => e.stopPropagation());
+    btn.addEventListener('dragstart', e => { e.preventDefault(); e.stopPropagation(); });
+  });
+  document.getElementById('infoCloseBtn').onclick = closeInfo;
+  document.getElementById('infoOkBtn').onclick = closeInfo;
+  infoModal.addEventListener('click', e => { if (e.target === infoModal) closeInfo(); });
+
+  // TIMER MODAL
+  const timerModal = document.getElementById('timerModal');
+  const timerOutCount = document.getElementById('timerOutCount');
+  const timerOutCountVal = document.getElementById('timerOutCountVal');
+  const timerDelayValue = document.getElementById('timerDelayValue');
+  const timerDelayUnit = document.getElementById('timerDelayUnit');
+  const timerPreview = document.getElementById('timerPreview');
+  timerOutCount.addEventListener('input', () => timerOutCountVal.textContent = timerOutCount.value);
+  function formatDuration(ms) { if (ms < 1000) return ms + ' мс'; if (ms < 60_000) return (ms/1000).toFixed(ms % 1000 === 0 ? 0 : 2) + ' с'; if (ms < 3600_000) return (ms/60000).toFixed(2) + ' мин'; if (ms < 86400_000) return (ms/3600000).toFixed(2) + ' ч'; return (ms/(30*86400000)).toFixed(2) + ' мес'; }
+  function updateTimerPreview() { const val = parseInt(timerDelayValue.value) || 1; const unit = timerDelayUnit.value; timerPreview.textContent = `Задержка: ${val} ${pluralForm(val, UNIT_LABEL[unit])} = ${formatDuration(val * UNIT_MS[unit])}`; }
+  timerDelayValue.addEventListener('input', updateTimerPreview);
+  timerDelayUnit.addEventListener('change', updateTimerPreview);
+  function openTimerSettings(elemId) { const elem = elements.find(e => e.id === elemId); if (!elem || elem.type !== 'TIMER') return; editingTimerId = elemId; timerOutCount.value = elem.timer.outCount; timerOutCountVal.textContent = elem.timer.outCount; timerDelayValue.value = elem.timer.delayValue; timerDelayUnit.value = elem.timer.delayUnit; updateTimerPreview(); timerModal.classList.add('active'); }
+  function closeTimerSettings() { timerModal.classList.remove('active'); editingTimerId = null; }
+  function applyTimerSettings() { if (editingTimerId === null) return; const elem = elements.find(e => e.id === editingTimerId); if (!elem) { closeTimerSettings(); return; } pushHistory(); elem.timer.outCount = parseInt(timerOutCount.value); elem.timer.delayValue = Math.max(1, parseInt(timerDelayValue.value) || 1); elem.timer.delayUnit = timerDelayUnit.value; elem.timer.delay = elem.timer.delayValue * UNIT_MS[elem.timer.delayUnit]; rebuildTimerRuntime(elem); wires = wires.filter(w => w.fromId !== elem.id || (w.fromPort || 0) < elem.timer.outCount); computeLogic(); scheduleAutoSave(); draw(); closeTimerSettings(); }
+  document.getElementById('timerCloseBtn').onclick = closeTimerSettings;
+  document.getElementById('timerCancelBtn').onclick = closeTimerSettings;
+  document.getElementById('timerApplyBtn').onclick = applyTimerSettings;
+  timerModal.addEventListener('click', e => { if (e.target === timerModal) closeTimerSettings(); });
+
+  // SOUND MODAL
+  const soundModal = document.getElementById('soundModal');
+  const soundFreq = document.getElementById('soundFreq');
+  const soundFreqVal = document.getElementById('soundFreqVal');
+  const soundDurValue = document.getElementById('soundDurValue');
+  const soundDurUnit = document.getElementById('soundDurUnit');
+  const soundAlways = document.getElementById('soundAlways');
+  const soundAlwaysRow = document.getElementById('soundAlwaysRow');
+  const soundPreview = document.getElementById('soundPreview');
+  const soundWaveBtns = document.querySelectorAll('.wave-btn');
+
+  function drawWavePreview(cv, wave) { const cctx = cv.getContext('2d'); const w = cv.width, h = cv.height; cctx.clearRect(0, 0, w, h); cctx.strokeStyle = '#ff99cc'; cctx.lineWidth = 2; cctx.beginPath(); for (let x = 0; x < w; x++) { const t = (x / w) * 4 * Math.PI; let y; if (wave === 'sine') y = Math.sin(t); else if (wave === 'triangle') y = 2 / Math.PI * Math.asin(Math.sin(t)); else y = Math.sign(Math.sin(t)); const cy = h/2 - y * (h/2 - 3); if (x === 0) cctx.moveTo(x, cy); else cctx.lineTo(x, cy); } cctx.stroke(); }
+  document.querySelectorAll('[data-wave-preview]').forEach(c => drawWavePreview(c, c.dataset.wavePreview));
+  soundWaveBtns.forEach(btn => btn.addEventListener('click', () => { soundWaveBtns.forEach(b => b.classList.remove('active')); btn.classList.add('active'); soundDraftWave = btn.dataset.wave; updateSoundPreview(); }));
+  soundFreq.addEventListener('input', () => { soundFreqVal.textContent = soundFreq.value; updateSoundPreview(); });
+  soundDurValue.addEventListener('input', updateSoundPreview);
+  soundDurUnit.addEventListener('change', updateSoundPreview);
+  soundAlways.addEventListener('change', () => { soundAlwaysRow.style.borderColor = soundAlways.checked ? '#ff99cc' : '#3a3a52'; updateSoundPreview(); });
+  function updateSoundPreview() { const freq = soundFreq.value; const waveName = { sine: 'Sine', triangle: 'Triangle', square: 'Square' }[soundDraftWave]; if (soundAlways.checked) soundPreview.textContent = `${freq} Гц · ${waveName} · Всегда`; else { const val = parseInt(soundDurValue.value) || 1; const unit = soundDurUnit.value; soundPreview.textContent = `${freq} Гц · ${waveName} · ${val} ${pluralForm(val, UNIT_LABEL[unit])}`; } }
+  function openSoundSettings(elemId) { const elem = elements.find(e => e.id === elemId); if (!elem || elem.type !== 'SOUND') return; editingSoundId = elemId; soundFreq.value = elem.sound.freq; soundFreqVal.textContent = elem.sound.freq; soundDurValue.value = elem.sound.durationValue; soundDurUnit.value = elem.sound.durationUnit; soundAlways.checked = elem.sound.always; soundAlwaysRow.style.borderColor = elem.sound.always ? '#ff99cc' : '#3a3a52'; soundDraftWave = elem.sound.wave; soundWaveBtns.forEach(b => b.classList.toggle('active', b.dataset.wave === elem.sound.wave)); updateSoundPreview(); soundModal.classList.add('active'); }
+  function closeSoundSettings() { soundModal.classList.remove('active'); editingSoundId = null; if (testOsc) { try { testOsc.stop(); testOsc.disconnect(); } catch(e) {} testOsc = null; } }
+  let testOsc = null;
+  document.getElementById('soundTestBtn').onclick = () => { try { const actx = getAudioCtx(); if (testOsc) { try { testOsc.stop(); } catch(e){} testOsc = null; } testOsc = actx.createOscillator(); const g = actx.createGain(); g.gain.value = 0.15; testOsc.type = soundDraftWave; testOsc.frequency.value = parseInt(soundFreq.value); testOsc.connect(g); g.connect(actx.destination); testOsc.start(); setTimeout(() => { if (testOsc) { try { testOsc.stop(); testOsc.disconnect(); } catch(e){} testOsc = null; } }, 800); } catch (e) { alert('Не удалось: ' + e.message); } };
+  function applySoundSettings() { if (editingSoundId === null) return; const elem = elements.find(e => e.id === editingSoundId); if (!elem) { closeSoundSettings(); return; } pushHistory(); elem.sound.freq = parseInt(soundFreq.value) || 440; elem.sound.wave = soundDraftWave; elem.sound.durationValue = Math.max(1, parseInt(soundDurValue.value) || 1); elem.sound.durationUnit = soundDurUnit.value; elem.sound.duration = elem.sound.durationValue * UNIT_MS[elem.sound.durationUnit]; elem.sound.always = soundAlways.checked; if (activeSounds.has(elem.id)) { stopSound(elem.id); startSound(elem); } scheduleAutoSave(); draw(); closeSoundSettings(); }
+  document.getElementById('soundCloseBtn').onclick = closeSoundSettings;
+  document.getElementById('soundCancelBtn').onclick = closeSoundSettings;
+  document.getElementById('soundApplyBtn').onclick = applySoundSettings;
+  soundModal.addEventListener('click', e => { if (e.target === soundModal) closeSoundSettings(); });
+
+  const toast = document.getElementById('toast');
+  let toastTimeout = null;
+  function showToast(text, extraClass) {
+    toast.textContent = text;
+    toast.className = 'toast show' + (extraClass ? ' ' + extraClass : '');
+    if (toastTimeout) clearTimeout(toastTimeout);
+    toastTimeout = setTimeout(() => toast.classList.remove('show'), 2500);
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      if (settingsModal.classList.contains('active')) closeSettings();
+      else if (examplesModal.classList.contains('active')) examplesModal.classList.remove('active');
+      else if (soundModal.classList.contains('active')) closeSoundSettings();
+      else if (timerModal.classList.contains('active')) closeTimerSettings();
+      else if (infoModal.classList.contains('active')) closeInfo();
+      else if (modal.classList.contains('active')) closeModal();
+    }
+  });
+
+  // ПРИМЕРЫ
+  const EXAMPLES = [
+    { icon:'💡', name:'Лампочка', complexity:'easy', desc:'Рычаг → Лампа.', build:() => { const s=createElem('SWITCH',200,250); const l=createElem('LAMP',500,250); wires.push({fromId:s.id,fromPort:0,toId:l.id,toPort:0}); } },
+    { icon:'🔄', name:'Инвертор', complexity:'easy', desc:'Рычаг → НЕ → Лампа.', build:() => { const s=createElem('SWITCH',200,250); const n=createElem('NOT',400,250); const l=createElem('LAMP',600,250); wires.push({fromId:s.id,fromPort:0,toId:n.id,toPort:0},{fromId:n.id,fromPort:0,toId:l.id,toPort:0}); } },
+    { icon:'🔀', name:'Разветвитель', complexity:'easy', desc:'1 сигнал → 2 лампы.', build:() => { const s=createElem('SWITCH',150,250); const sp=createElem('SPLIT',380,250); const l1=createElem('LAMP',620,150); const l2=createElem('LAMP',620,350); wires.push({fromId:s.id,fromPort:0,toId:sp.id,toPort:0},{fromId:sp.id,fromPort:0,toId:l1.id,toPort:0},{fromId:sp.id,fromPort:1,toId:l2.id,toPort:0}); } },
+    { icon:'🚪', name:'Логическое И', complexity:'easy', desc:'2 рычага → AND → Лампа.', build:() => { const a=createElem('SWITCH',150,150); const b=createElem('SWITCH',150,350); const an=createElem('AND',400,250); const l=createElem('LAMP',650,250); wires.push({fromId:a.id,fromPort:0,toId:an.id,toPort:0},{fromId:b.id,fromPort:0,toId:an.id,toPort:1},{fromId:an.id,fromPort:0,toId:l.id,toPort:0}); } },
+    { icon:'🔊', name:'Пищалка', complexity:'easy', desc:'Кнопка → Звук 880 Гц.', build:() => { const b=createElem('BUTTON',200,250); const s=createElem('SOUND',500,250); s.sound.freq=880; s.sound.wave='square'; s.sound.always=true; wires.push({fromId:b.id,fromPort:0,toId:s.id,toPort:0}); } },
+    { icon:'➕', name:'Полусумматор', complexity:'medium', desc:'A+B=Sum+Carry.', build:() => { const a=createElem('SWITCH',100,150); const b=createElem('SWITCH',100,350); const x=createElem('XOR',350,150); const an=createElem('AND',350,350); const l1=createElem('LAMP',600,150); const l2=createElem('LAMP',600,350); wires.push({fromId:a.id,fromPort:0,toId:x.id,toPort:0},{fromId:b.id,fromPort:0,toId:x.id,toPort:1},{fromId:a.id,fromPort:0,toId:an.id,toPort:0},{fromId:b.id,fromPort:0,toId:an.id,toPort:1},{fromId:x.id,fromPort:0,toId:l1.id,toPort:0},{fromId:an.id,fromPort:0,toId:l2.id,toPort:0}); } },
+    { icon:'⏱', name:'Задержка 2 сек', complexity:'medium', desc:'Таймер(2с).', build:() => { const s=createElem('SWITCH',150,250); const t=createElem('TIMER',400,250); t.timer.delay=2000; t.timer.delayValue=2; t.timer.delayUnit='s'; const l=createElem('LAMP',650,250); wires.push({fromId:s.id,fromPort:0,toId:t.id,toPort:0},{fromId:t.id,fromPort:0,toId:l.id,toPort:0}); } },
+    { icon:'D', name:'D-триггер', complexity:'medium', desc:'Защёлка.', build:() => { const clk=createElem('BUTTON',100,100); const d=createElem('SWITCH',100,400); const ff=createElem('DFF',400,250); const q=createElem('LAMP',650,200); const nq=createElem('LAMP',650,350); wires.push({fromId:clk.id,fromPort:0,toId:ff.id,toPort:0},{fromId:d.id,fromPort:0,toId:ff.id,toPort:1},{fromId:ff.id,fromPort:0,toId:q.id,toPort:0},{fromId:ff.id,fromPort:1,toId:nq.id,toPort:0}); } },
+    { icon:'JK', name:'JK-триггер', complexity:'medium', desc:'Универсальный.', build:() => { const clk=createElem('BUTTON',100,100); const j=createElem('SWITCH',100,300); const k=createElem('SWITCH',100,500); const ff=createElem('JKFF',400,300); const q=createElem('LAMP',650,250); const nq=createElem('LAMP',650,400); wires.push({fromId:clk.id,fromPort:0,toId:ff.id,toPort:0},{fromId:j.id,fromPort:0,toId:ff.id,toPort:1},{fromId:k.id,fromPort:0,toId:ff.id,toPort:2},{fromId:ff.id,fromPort:0,toId:q.id,toPort:0},{fromId:ff.id,fromPort:1,toId:nq.id,toPort:0}); } },
+    { icon:'T', name:'T-триггер', complexity:'medium', desc:'Делитель частоты.', build:() => { const clk=createElem('BUTTON',100,250); const t=createElem('SWITCH',100,400); const ff=createElem('TFF',400,250); const q=createElem('LAMP',650,200); const nq=createElem('LAMP',650,350); wires.push({fromId:clk.id,fromPort:0,toId:ff.id,toPort:0},{fromId:t.id,fromPort:0,toId:ff.id,toPort:1},{fromId:ff.id,fromPort:0,toId:q.id,toPort:0},{fromId:ff.id,fromPort:1,toId:nq.id,toPort:0}); } },
+    { icon:'MUX', name:'Мультиплексор', complexity:'medium', desc:'Выбор из 4.', build:() => { const mux=createElem('MUX',400,280); const l=createElem('LAMP',700,280); for(let i=0;i<4;i++){const s=createElem('SWITCH',80,100+i*100); wires.push({fromId:s.id,fromPort:0,toId:mux.id,toPort:i});} const s0=createElem('SWITCH',80,550); const s1=createElem('SWITCH',80,650); wires.push({fromId:s0.id,fromPort:0,toId:mux.id,toPort:4},{fromId:s1.id,fromPort:0,toId:mux.id,toPort:5},{fromId:mux.id,fromPort:0,toId:l.id,toPort:0}); } },
+    { icon:'DMX', name:'Демультиплексор', complexity:'medium', desc:'1→4.', build:() => { const d=createElem('SWITCH',80,250); const s0=createElem('SWITCH',80,500); const s1=createElem('SWITCH',80,650); const dmx=createElem('DEMUX',400,280); const l0=createElem('LAMP',700,100); const l1=createElem('LAMP',700,220); const l2=createElem('LAMP',700,340); const l3=createElem('LAMP',700,460); wires.push({fromId:d.id,fromPort:0,toId:dmx.id,toPort:0},{fromId:s0.id,fromPort:0,toId:dmx.id,toPort:1},{fromId:s1.id,fromPort:0,toId:dmx.id,toPort:2},{fromId:dmx.id,fromPort:0,toId:l0.id,toPort:0},{fromId:dmx.id,fromPort:1,toId:l1.id,toPort:0},{fromId:dmx.id,fromPort:2,toId:l2.id,toPort:0},{fromId:dmx.id,fromPort:3,toId:l3.id,toPort:0}); } },
+    { icon:'🧮', name:'Полный сумматор', complexity:'hard', desc:'A+B+Cin.', build:() => { const a=createElem('SWITCH',60,100); const b=createElem('SWITCH',60,280); const c=createElem('SWITCH',60,460); const x1=createElem('XOR',260,180); const x2=createElem('XOR',480,180); const an1=createElem('AND',260,380); const an2=createElem('AND',480,380); const o=createElem('OR',700,380); const lS=createElem('LAMP',700,180); const lC=createElem('LAMP',900,380); wires.push({fromId:a.id,fromPort:0,toId:x1.id,toPort:0},{fromId:b.id,fromPort:0,toId:x1.id,toPort:1},{fromId:x1.id,fromPort:0,toId:x2.id,toPort:0},{fromId:c.id,fromPort:0,toId:x2.id,toPort:1},{fromId:a.id,fromPort:0,toId:an1.id,toPort:0},{fromId:b.id,fromPort:0,toId:an1.id,toPort:1},{fromId:x1.id,fromPort:0,toId:an2.id,toPort:0},{fromId:c.id,fromPort:0,toId:an2.id,toPort:1},{fromId:an1.id,fromPort:0,toId:o.id,toPort:0},{fromId:an2.id,fromPort:0,toId:o.id,toPort:1},{fromId:x2.id,fromPort:0,toId:lS.id,toPort:0},{fromId:o.id,fromPort:0,toId:lC.id,toPort:0}); } },
+    { icon:'🎲', name:'Генератор импульсов', complexity:'hard', desc:'2 таймера.', build:() => { const s=createElem('SWITCH',80,250); const t1=createElem('TIMER',280,250); t1.timer.delay=300;t1.timer.delayValue=300;t1.timer.delayUnit='ms'; const n=createElem('NOT',480,250); const t2=createElem('TIMER',660,250); t2.timer.delay=300;t2.timer.delayValue=300;t2.timer.delayUnit='ms'; const l=createElem('LAMP',860,250); wires.push({fromId:s.id,fromPort:0,toId:t1.id,toPort:0},{fromId:t1.id,fromPort:0,toId:n.id,toPort:0},{fromId:n.id,fromPort:0,toId:t2.id,toPort:0},{fromId:t2.id,fromPort:0,toId:t1.id,toPort:0},{fromId:t2.id,fromPort:0,toId:l.id,toPort:0}); } },
+    { icon:'🎼', name:'Мелодия', complexity:'hard', desc:'3 звука.', build:() => { const b=createElem('BUTTON',80,250); const sp1=createElem('SPLIT',250,250); const sp2=createElem('SPLIT',430,250); const s1=createElem('SOUND',620,100); const s2=createElem('SOUND',620,250); const s3=createElem('SOUND',620,400); s1.sound.freq=523;s1.sound.wave='sine';s1.sound.always=true; s2.sound.freq=659;s2.sound.wave='triangle';s2.sound.always=true; s3.sound.freq=784;s3.sound.wave='sine';s3.sound.always=true; wires.push({fromId:b.id,fromPort:0,toId:sp1.id,toPort:0},{fromId:sp1.id,fromPort:0,toId:s1.id,toPort:0},{fromId:sp1.id,fromPort:1,toId:sp2.id,toPort:0},{fromId:sp2.id,fromPort:0,toId:s2.id,toPort:0},{fromId:sp2.id,fromPort:1,toId:s3.id,toPort:0}); } },
+    { icon:'🚨', name:'Сирена', complexity:'hard', desc:'2 частоты.', build:() => { const b=createElem('BUTTON',80,250); const x=createElem('XOR',300,250); const s1=createElem('SOUND',520,150); const s2=createElem('SOUND',520,350); s1.sound.freq=600;s1.sound.wave='triangle';s1.sound.always=true; s2.sound.freq=900;s2.sound.wave='triangle';s2.sound.always=true; wires.push({fromId:b.id,fromPort:0,toId:x.id,toPort:0},{fromId:x.id,fromPort:0,toId:s1.id,toPort:0},{fromId:b.id,fromPort:0,toId:x.id,toPort:1},{fromId:x.id,fromPort:0,toId:s2.id,toPort:0}); } },
+    { icon:'🔒', name:'SR-триггер', complexity:'hard', desc:'Хранит бит.', build:() => { const s=createElem('SWITCH',60,150); const r=createElem('SWITCH',60,350); const x1=createElem('XOR',300,220); const x2=createElem('XOR',500,280); const l=createElem('LAMP',720,250); wires.push({fromId:s.id,fromPort:0,toId:x1.id,toPort:0},{fromId:x1.id,fromPort:0,toId:x2.id,toPort:0},{fromId:r.id,fromPort:0,toId:x2.id,toPort:1},{fromId:x2.id,fromPort:0,toId:l.id,toPort:0}); } },
+    { icon:'🔢', name:'4-битный сумматор', complexity:'veryhard', desc:'Сложение 4 бит.', build:() => { const a0=createElem('SWITCH',40,60),a1=createElem('SWITCH',40,160),a2=createElem('SWITCH',40,260),a3=createElem('SWITCH',40,360); const b0=createElem('SWITCH',40,480),b1=createElem('SWITCH',40,580),b2=createElem('SWITCH',40,680),b3=createElem('SWITCH',40,780); const x0=createElem('XOR',260,100),an0=createElem('AND',260,480); const x1a=createElem('XOR',460,140),x1b=createElem('XOR',660,140),an1a=createElem('AND',460,520),an1b=createElem('AND',660,520),or1=createElem('OR',860,520); const x2a=createElem('XOR',460,240),x2b=createElem('XOR',660,240),an2a=createElem('AND',460,600),an2b=createElem('AND',660,600),or2=createElem('OR',860,600); const x3a=createElem('XOR',460,340),x3b=createElem('XOR',660,340),an3a=createElem('AND',460,680),an3b=createElem('AND',660,680),or3=createElem('OR',860,680); const l0=createElem('LAMP',1060,100),l1=createElem('LAMP',1200,140),l2=createElem('LAMP',1200,240),l3=createElem('LAMP',1200,340),lC=createElem('LAMP',1200,680); wires.push({fromId:a0.id,fromPort:0,toId:x0.id,toPort:0},{fromId:b0.id,fromPort:0,toId:x0.id,toPort:1},{fromId:a0.id,fromPort:0,toId:an0.id,toPort:0},{fromId:b0.id,fromPort:0,toId:an0.id,toPort:1},{fromId:x0.id,fromPort:0,toId:l0.id,toPort:0}); wires.push({fromId:a1.id,fromPort:0,toId:x1a.id,toPort:0},{fromId:b1.id,fromPort:0,toId:x1a.id,toPort:1},{fromId:x1a.id,fromPort:0,toId:x1b.id,toPort:0},{fromId:an0.id,fromPort:0,toId:x1b.id,toPort:1},{fromId:a1.id,fromPort:0,toId:an1a.id,toPort:0},{fromId:b1.id,fromPort:0,toId:an1a.id,toPort:1},{fromId:x1a.id,fromPort:0,toId:an1b.id,toPort:0},{fromId:an0.id,fromPort:0,toId:an1b.id,toPort:1},{fromId:an1a.id,fromPort:0,toId:or1.id,toPort:0},{fromId:an1b.id,fromPort:0,toId:or1.id,toPort:1},{fromId:x1b.id,fromPort:0,toId:l1.id,toPort:0}); wires.push({fromId:a2.id,fromPort:0,toId:x2a.id,toPort:0},{fromId:b2.id,fromPort:0,toId:x2a.id,toPort:1},{fromId:x2a.id,fromPort:0,toId:x2b.id,toPort:0},{fromId:or1.id,fromPort:0,toId:x2b.id,toPort:1},{fromId:a2.id,fromPort:0,toId:an2a.id,toPort:0},{fromId:b2.id,fromPort:0,toId:an2a.id,toPort:1},{fromId:x2a.id,fromPort:0,toId:an2b.id,toPort:0},{fromId:or1.id,fromPort:0,toId:an2b.id,toPort:1},{fromId:an2a.id,fromPort:0,toId:or2.id,toPort:0},{fromId:an2b.id,fromPort:0,toId:or2.id,toPort:1},{fromId:x2b.id,fromPort:0,toId:l2.id,toPort:0}); wires.push({fromId:a3.id,fromPort:0,toId:x3a.id,toPort:0},{fromId:b3.id,fromPort:0,toId:x3a.id,toPort:1},{fromId:x3a.id,fromPort:0,toId:x3b.id,toPort:0},{fromId:or2.id,fromPort:0,toId:x3b.id,toPort:1},{fromId:a3.id,fromPort:0,toId:an3a.id,toPort:0},{fromId:b3.id,fromPort:0,toId:an3a.id,toPort:1},{fromId:x3a.id,fromPort:0,toId:an3b.id,toPort:0},{fromId:or2.id,fromPort:0,toId:an3b.id,toPort:1},{fromId:an3a.id,fromPort:0,toId:or3.id,toPort:0},{fromId:an3b.id,fromPort:0,toId:or3.id,toPort:1},{fromId:x3b.id,fromPort:0,toId:l3.id,toPort:0},{fromId:or3.id,fromPort:0,toId:lC.id,toPort:0}); } },
+    { icon:'🔐', name:'Кодовый замок', complexity:'veryhard', desc:'1-0-1-1.', build:() => { const a=createElem('SWITCH',60,100),b=createElem('SWITCH',60,250),c=createElem('SWITCH',60,400),d=createElem('SWITCH',60,550); const nb=createElem('NOT',260,250); const an1=createElem('AND',460,180),an2=createElem('AND',460,480),an3=createElem('AND',660,330); const l=createElem('LAMP',880,330); wires.push({fromId:a.id,fromPort:0,toId:an1.id,toPort:0},{fromId:b.id,fromPort:0,toId:nb.id,toPort:0},{fromId:nb.id,fromPort:0,toId:an1.id,toPort:1},{fromId:c.id,fromPort:0,toId:an2.id,toPort:0},{fromId:d.id,fromPort:0,toId:an2.id,toPort:1},{fromId:an1.id,fromPort:0,toId:an3.id,toPort:0},{fromId:an2.id,fromPort:0,toId:an3.id,toPort:1},{fromId:an3.id,fromPort:0,toId:l.id,toPort:0}); } },
+    { icon:'🎹', name:'Пианино', complexity:'veryhard', desc:'4 кнопки → 4 звука.', build:() => { const b1=createElem('BUTTON',60,100),b2=createElem('BUTTON',60,250),b3=createElem('BUTTON',60,400),b4=createElem('BUTTON',60,550); const s1=createElem('SOUND',350,100),s2=createElem('SOUND',350,250),s3=createElem('SOUND',350,400),s4=createElem('SOUND',350,550); s1.sound.freq=523;s1.sound.wave='sine';s1.sound.always=true; s2.sound.freq=659;s2.sound.wave='sine';s2.sound.always=true; s3.sound.freq=784;s3.sound.wave='sine';s3.sound.always=true; s4.sound.freq=1046;s4.sound.wave='sine';s4.sound.always=true; wires.push({fromId:b1.id,fromPort:0,toId:s1.id,toPort:0},{fromId:b2.id,fromPort:0,toId:s2.id,toPort:0},{fromId:b3.id,fromPort:0,toId:s3.id,toPort:0},{fromId:b4.id,fromPort:0,toId:s4.id,toPort:0}); } },
+    { icon:'📊', name:'Сдвиговый регистр', complexity:'veryhard', desc:'4-бит сдвиг.', build:() => { const clk=createElem('BUTTON',60,100); const d=createElem('SWITCH',60,350); const t1=createElem('XOR',250,150),n1=createElem('NOT',250,300); const t2=createElem('XOR',450,150),n2=createElem('NOT',450,300); const t3=createElem('XOR',650,150),n3=createElem('NOT',650,300); const t4=createElem('XOR',850,150),n4=createElem('NOT',850,300); const l1=createElem('LAMP',250,500),l2=createElem('LAMP',450,500),l3=createElem('LAMP',650,500),l4=createElem('LAMP',850,500); wires.push({fromId:d.id,fromPort:0,toId:t1.id,toPort:0},{fromId:clk.id,fromPort:0,toId:t1.id,toPort:1},{fromId:t1.id,fromPort:0,toId:n1.id,toPort:0},{fromId:n1.id,fromPort:0,toId:t2.id,toPort:0},{fromId:clk.id,fromPort:0,toId:t2.id,toPort:1},{fromId:t2.id,fromPort:0,toId:n2.id,toPort:0},{fromId:n2.id,fromPort:0,toId:t3.id,toPort:0},{fromId:clk.id,fromPort:0,toId:t3.id,toPort:1},{fromId:t3.id,fromPort:0,toId:n3.id,toPort:0},{fromId:n3.id,fromPort:0,toId:t4.id,toPort:0},{fromId:clk.id,fromPort:0,toId:t4.id,toPort:1},{fromId:t4.id,fromPort:0,toId:n4.id,toPort:0},{fromId:t1.id,fromPort:0,toId:l1.id,toPort:0},{fromId:t2.id,fromPort:0,toId:l2.id,toPort:0},{fromId:t3.id,fromPort:0,toId:l3.id,toPort:0},{fromId:t4.id,fromPort:0,toId:l4.id,toPort:0}); } },
+    { icon:'🎯', name:'Угадай бит', complexity:'veryhard', desc:'Чётность.', build:() => { const a=createElem('SWITCH',60,100),b=createElem('SWITCH',60,250),c=createElem('SWITCH',60,400); const x1=createElem('XOR',300,180),x2=createElem('XOR',500,300); const n1=createElem('NOT',700,300); const an=createElem('AND',900,300); const l=createElem('LAMP',1100,300); wires.push({fromId:a.id,fromPort:0,toId:x1.id,toPort:0},{fromId:b.id,fromPort:0,toId:x1.id,toPort:1},{fromId:x1.id,fromPort:0,toId:x2.id,toPort:0},{fromId:c.id,fromPort:0,toId:x2.id,toPort:1},{fromId:x2.id,fromPort:0,toId:n1.id,toPort:0},{fromId:x2.id,fromPort:0,toId:an.id,toPort:0},{fromId:n1.id,fromPort:0,toId:an.id,toPort:1},{fromId:an.id,fromPort:0,toId:l.id,toPort:0}); } }
+  ];
+
+  const examplesModal = document.getElementById('examplesModal');
+  const examplesGrid = document.getElementById('examplesGrid');
+  const examplesFilter = document.getElementById('examplesFilter');
+
+  const complexityLabel = { easy: { text: '🟢 Лёгкий', cls: 'easy' }, medium: { text: '🟡 Средний', cls: 'medium' }, hard: { text: '🔴 Сложный', cls: 'hard' }, veryhard: { text: '🟣 Очень сложный', cls: 'veryhard' } };
+
+  function renderExamples(filter) {
+    const filtered = filter === 'all' ? EXAMPLES : EXAMPLES.filter(e => e.complexity === filter);
+    examplesGrid.innerHTML = '';
+    filtered.forEach((ex) => {
+      const card = document.createElement('div');
+      card.className = 'example-card';
+      const cl = complexityLabel[ex.complexity];
+      card.innerHTML = `<div class="example-card-header"><div class="example-card-icon">${ex.icon}</div><div class="example-card-title"><div class="example-card-name">${ex.name}</div><div class="example-card-desc">${ex.desc}</div></div></div><div class="example-card-footer"><span class="complexity-badge ${cl.cls}">${cl.text}</span><span class="example-card-stats">нажмите →</span></div>`;
+      card.addEventListener('click', () => {
+        if (elements.length > 0 && !confirm(`Загрузить пример "${ex.name}"? Текущая схема будет заменена.`)) return;
+        pushHistory(); stopAllSounds();
+        elements = []; wires = []; nextId = 1;
+        ex.build();
+        computeLogic(); scheduleAutoSave(); draw();
+        examplesModal.classList.remove('active');
+        showToast(`✨ Пример "${ex.name}" загружен`);
+      });
+      examplesGrid.appendChild(card);
+    });
+  }
+
+  function updateCounts() {
+    const counts = { all: EXAMPLES.length, easy: 0, medium: 0, hard: 0, veryhard: 0 };
+    EXAMPLES.forEach(e => counts[e.complexity]++);
+    document.getElementById('cntAll').textContent = counts.all;
+    document.getElementById('cntEasy').textContent = counts.easy;
+    document.getElementById('cntMedium').textContent = counts.medium;
+    document.getElementById('cntHard').textContent = counts.hard;
+    document.getElementById('cntVeryHard').textContent = counts.veryhard;
+  }
+  updateCounts();
+
+  document.getElementById('examplesBtn').onclick = () => { renderExamples('all'); examplesFilter.querySelectorAll('.filter-btn').forEach(b => b.classList.toggle('active', b.dataset.filter === 'all')); examplesModal.classList.add('active'); };
+  document.getElementById('examplesCloseBtn').onclick = () => examplesModal.classList.remove('active');
+  examplesModal.addEventListener('click', e => { if (e.target === examplesModal) examplesModal.classList.remove('active'); });
+  examplesFilter.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      examplesFilter.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderExamples(btn.dataset.filter);
+    });
+  });
+
+  // ЗАПУСК
+  updateDimensions();
+  document.body.className = 'size-' + currentSize + (freeFieldEnabled ? ' free-field' : '');
+  document.querySelectorAll('.settings-size-option').forEach(opt => opt.classList.toggle('active', opt.dataset.size === currentSize));
+  resizeCanvas();
+
+  if (!tryRestoreAutoSave()) {
+    setTimeout(() => {
+      const a = createElem('SWITCH', 150, 200);
+      const b = createElem('SWITCH', 150, 350);
+      const x = createElem('XOR', 400, 200);
+      const an = createElem('AND', 400, 350);
+      const lamp1 = createElem('LAMP', 650, 200);
+      const lamp2 = createElem('LAMP', 650, 350);
+      wires.push({ fromId: a.id, fromPort: 0, toId: x.id, toPort: 0 });
+      wires.push({ fromId: b.id, fromPort: 0, toId: x.id, toPort: 1 });
+      wires.push({ fromId: a.id, fromPort: 0, toId: an.id, toPort: 0 });
+      wires.push({ fromId: b.id, fromPort: 0, toId: an.id, toPort: 1 });
+      wires.push({ fromId: x.id, fromPort: 0, toId: lamp1.id, toPort: 0 });
+      wires.push({ fromId: an.id, fromPort: 0, toId: lamp2.id, toPort: 0 });
+      computeLogic(); scheduleAutoSave(); draw();
+    }, 100);
+  }
+
+  setTimeout(() => { pushHistory(); updateUndoRedoButtons(); }, 200);
+
+  setInterval(() => { processTimers(); processSoundElements(); }, 16);
+
+  // Главный цикл анимации — только для view (зум + панорамирование)
+  (function animationLoop() {
+    if (freeFieldEnabled && (Math.abs(view.x - viewTarget.x) > 0.1 || Math.abs(view.y - viewTarget.y) > 0.1 || Math.abs(view.zoom - viewTarget.zoom) > 0.001)) {
+      updateViewAnimation();
+    }
+    requestAnimationFrame(animationLoop);
+  })();
+
+  console.log(`⚡ LOGICH v${VERSION} — by ${AUTHOR} · Разработано с помощью ${AI}`);
+
+})();
+</script>
+</body>
+</html>
+
+2225 строк кода итого.
